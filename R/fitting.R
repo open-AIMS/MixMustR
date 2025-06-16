@@ -185,6 +185,27 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
   writeLines(paste0(script, collapse = ""), code_path)
 }
 
+#' @noRd
+check_sigma_ln_rho <- function(x, ref) {
+  er <- paste0("Parameter `sigma_ln_rho` needs to be either a single numeric",
+               " value or a matrix of ", nrow(ref), " rows and ", ncol(ref),
+                " columns, and cannot contain NA values.")
+  if (is.matrix(x) && is.numeric(x)) {
+    if (!all(dim(x) == dim(ref))) {
+      stop(er)
+    }
+    if (sum(is.na(x)) > 0) {
+      stop(er)
+    }
+  } else if (is.vector(x) && is.numeric(x)) {
+    if (length(x) != 1) {
+       stop(er)
+    }
+  } else {
+    stop(er)
+  }
+}
+
 #' @export
 mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
                                    sigma_ln_rho, m, sample_tracer,
@@ -205,9 +226,14 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
       as.matrix() |>
       abs_log(adjust = 0.0001)
   )
-  out[["sigma_ln_rho"]] <- matrix(
-    sigma_ln_rho, nrow(out$ln_rho), ncol(out$ln_rho)
-  )
+  check_sigma_ln_rho(sigma_ln_rho, yobs)
+  if (is.vector(sigma_ln_rho)) {
+    out[["sigma_ln_rho"]] <- matrix(
+      sigma_ln_rho, nrow(out$ln_rho), ncol(out$ln_rho)
+    )
+  } else {
+    out[["sigma_ln_rho"]] <- sigma_ln_rho
+  }
   if (sample_tracer) {
     out[["s"]] <- dplyr::select(sig_tab, -Group)
     out[["m"]] <- rep(m, nrow(mu_tab))
