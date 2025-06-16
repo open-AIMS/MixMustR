@@ -22,7 +22,7 @@ wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
       x[x == 0] <- 0.01 # NB: check this. Model can't deal with 0 variance
       x
     }))
-  list(mu_tab = mu_tab, sig_tab = sig_tab)
+  list(mus = mu_tab, sigmas = sig_tab)
 }
 
 #' @importFrom dplyr %>% mutate
