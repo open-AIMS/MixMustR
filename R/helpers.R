@@ -1,3 +1,12 @@
+#' @importFrom dplyr %>% mutate
+#' @noRd
+reshape_ref_data <- function(x, target = "stream_1_df", order_ref) {
+  (x[[target]][, order_ref]) %>%
+    mutate(Unsampled = 1 - rowSums(.)) |>
+    as.matrix() |>
+    abs()
+}
+
 #' @noRd
 fix_sum_to_one <- function(x) {
   new_x <- x
