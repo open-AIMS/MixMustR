@@ -36,7 +36,7 @@ al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366))
 as well as trophic interactions ([Hoenig et
 al. 2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
 
-<img src="man/figures/diagram.png" width = 500 alt="mixmustr Logo" align="center" />
+<img src="man/figures/diagram.png" width = 800 alt="mixmustr Logo" align="center" />
 
 **Figure 1:** MixMustR input data and framework. MixMustR relies on two
 independent data streams that are collected from the same *N* samples.
