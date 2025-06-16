@@ -2,6 +2,7 @@
 
 export(build_stancode)
 export(calc_marker_estimate)
+export(compare_mixing_proportions)
 export(make_fractionation_mat)
 export(make_jags_post_prop_long)
 export(make_mixture_data)

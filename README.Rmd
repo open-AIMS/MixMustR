@@ -33,11 +33,27 @@ Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 ## Overview
 
-`mixmustr` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/) which estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest (Fig. 1a–b): one obtained from chemical tracers/biomarkers (i.e., a single tracer measurement per observation, e.g., from stable isotopes and fatty acids), and another yielding source composition (e.g., based on eDNA). MixMustR also allows for the estimation of an additional, unsampled source component. We evaluate MixMustR models abilities to recover original source mixing proportions using two synthetic mixture datasets anchored to empirical values for a range of plant carbon sources in marine soils. Some of our model choices build on the widely-used [MixSIAR](https://github.com/brianstock/MixSIAR). MixMustR should have wide applicability in ecological studies, particularly given the growing usage and availability of eDNA and metabarcoding methods to understand carbon source-sink dynamics ([Queirós et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366)) as well as trophic interactions ([Hoenig et al. 2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
+`mixmustr` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/). It estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest (Fig. 1a–b): one obtained from chemical tracers/biomarkers (i.e., a single tracer measurement per observation, e.g., from stable isotopes and fatty acids), and another yielding source composition (e.g., based on eDNA). `mixmustr` also allows for the estimation of an additional, unsampled source component to partially relax the assumption that the mixing proportions from all samples sources should sum up to 1. `mixmustr` should have wide applicability in ecological studies, particularly given the growing usage and availability of eDNA and metabarcoding methods to understand carbon source-sink dynamics ([Queirós et al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366)) as well as trophic interactions ([Hoenig et al. 2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
 
 <img src="man/figures/diagram.png" width = 800 alt="mixmustr Logo" align="center" />
 
-**Figure 1:** MixMustR input data and framework. MixMustR relies on two independent data streams that are collected from the same *N* samples. a) the first stream (blue panel) is characterised by the canonical chemical tracer/biomarker (e.g., stable isotope, fatty acid) dataset, whereby a mixture measurement is obtained for every *k*^th^ tracer and *n*^th^ observation. The original sources of such mixtures are unknown, and based on domain knowledge researchers often assume that they come from *J* likely sources—here represented by hypothetical autotrophic carbon sources within the dashed bubble. However, there is a possibility that at least one additional source (the question mark) is not comprised in the *J* set of sources. b) The second stream (yellow panel) is yielded by community composition datasets which can be transformed to mixing proportions, such as those obtained via eDNA or metabarcoding techniques. This stream of information can reveal mixture sources beyond the original *J* sources considered by researchers, and MixMustR leverages that knowledge by combining those additional sources into one single "unsampled" source, which would amount to the question mark in the first data stream. Given these data, the user can choose among eight model variants based on three choices (c—e).
+**Figure 1:** `mixmustr` input data and framework. `mixmustr` relies on two independent data streams that are collected from the same *N* samples. a) the first stream (blue panel) is characterised by the canonical chemical tracer/biomarker (e.g., stable isotope, fatty acid) dataset, whereby a mixture measurement is obtained for every *k*^th^ tracer and *n*^th^ observation. The original sources of such mixtures are unknown, and based on domain knowledge researchers often assume that they come from *J* likely sources—here represented by hypothetical autotrophic carbon sources within the dashed bubble. However, there is a possibility that at least one additional source (the question mark) is not comprised in the *J* set of sources. b) The second stream (yellow panel) is yielded by community composition datasets which can be transformed to mixing proportions, such as those obtained via eDNA or metabarcoding techniques. This stream of information can reveal mixture sources beyond the original *J* sources considered by researchers, and `mixmustr` leverages that information by combining those additional sources into one single *unsampled* source, which would amount to the question mark in the first data stream. Given these data, the user can choose among eight model variants based on three choices (c—e, see below for more explanations).
+
+## Model variants
+
+`mixmustr` currently allows for eight model variants which result from three user-driven binary choices: 1) should the model only ingest the mean sampled-source tracer signatures (equivalent to "residual-only error" structure of the widely-used [MixSIAR](https://github.com/brianstock/MixSIAR)) or should it incorporate their uncertainty based on user-provided mean, variance and sample size information (equivalent to "process error" structure of MixSIAR, Fig. 1c); 2) should the unsampled-source tracer signatures be fixed at the mean across all sampled sources, or should they rather be estimated based on a prior informed by the mean and variance across the sampled tracer signatures? (Fig. 1d) and 3) should all observations be treated as independent or should the model include a hierarchical grouping structure? (Fig. 1e).
+
+## Synthetic datasets
+
+`mixmustr` comes with two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`. Both are anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils. They differ in their discrepancy between the underlying mixing proportions between data streams 1 and 2, with `synthetic_df_convergent` exhibiting little difference, whereas `synthetic_df_divergent` exhibits larger difference:
+
+```{r, echo = FALSE, eval = TRUE, out.width = "80%"}
+library(mixmustr)
+mus <- tracer_parameters$mus
+compare_mixing_proportions(synthetic_df_divergent, synthetic_df_convergent, mus)
+```
+
+Although in real applications the user is unlikely to know the underlying mixing proportion of data stream 1, these synthetic datasets are useful to test the ability of the model variants (see above) to retrieve the underlying mixture proportions, and the package offers simple summary and visualisation functions for diagnostics.
 
 ## Installation
 
@@ -47,7 +63,7 @@ The current development version can be downloaded from GitHub via
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
 }
-remotes::install_github("open-aims/mixmustr", ref = "dev")
+remotes::install_github("open-aims/mixmustr", ref = "main")
 ```
 
 Because `mixmustr` is based on [Stan](https://mc-stan.org/), a C++
@@ -64,11 +80,19 @@ for further instructions on how to get the compilers running.
 library(mixmustr)
 options(mc.cores = parallel::detectCores())
 rstan::rstan_options(auto_write = TRUE)
-tracer_pars <- wrangle_tracer_pars(bcs_si, bcs_fa)
-mu_tab <- tracer_pars$mu_tab
-sig_tab <- tracer_pars$sig_tab
+# `tracer_parameters` are built-in source signature datasets (mean and SDs) for
+#   marine plant carbon sources. See original references in the documentation
+#   for `bcs_si` and `bcs_fa.
+# `mixmustr_models` is another built-in dataframe encoding the 8 model variants
+#   that are currently allowed.
+# `sigma_ln_rho` is the measurement error of data stream 1, on the natural log
+#   scale. It encodes the user's degree of trust in how mixing proportions were
+#   generated from, e.g., eDNA data. It can either be a single numeric value,
+#   or a matrix of N observations x J sampled sources.
+mus <- tracer_parameters$mus
+sigmas <- tracer_parameters$sigmas
 model_fits <- run_all_mixmustr_models(
-  mixmustr_models, synthetic_df_convergent, mu_tab, sig_tab, sigma_ln_rho = 0.1,
+  mixmustr_models, synthetic_df_convergent, mus, sigmas, sigma_ln_rho = 0.1,
   iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 )
 ```
@@ -77,4 +101,4 @@ model_fits <- run_all_mixmustr_models(
 
 `mixmustr` is provided by the
 [Australian Institute of Marine Science](https://www.aims.gov.au/) under the
-MIT License([MIT](https://opensource.org/license/mit/)).
+MIT License ([MIT](https://opensource.org/license/mit/)).
