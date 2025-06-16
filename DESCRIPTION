@@ -1,0 +1,33 @@
+Package: mixmustr
+Title: "MixMustR: a multi-tracer Bayesian approach to unravelling the sources of organic mixtures"
+Version: 0.0.0.0
+Authors@R: c(person("Diego R.","Barneche", email = "d.barneche@aims.gov.au", role=c("aut", "cre"),comment = c(ORCID = "0000-0002-4568-2362")), person("Chritopher J.", "Fulton", email = "c.fulton@aims.gov.au", role = c("aut"),comment = c(ORCID = "0000-0002-1140-1999")))
+Description: TBW.
+Depends:
+    R (>= 4.1),
+    rstan,
+    ggplot2
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Biarch: true
+Imports:
+    dplyr,
+    purrr,
+    ggdist,
+    tidyr,
+    tools,
+    gtools,
+    tibble,
+    ggsci,
+    ggplot2,
+    truncnorm
+Suggests:
+    usethis,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+URL: https://open-aims.github.io/mixmustr/
+BugReports: https://github.com/open-aims/mixmustr/issues
+Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
