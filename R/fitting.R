@@ -207,14 +207,38 @@ check_sigma_ln_rho <- function(x, ref) {
   }
 }
 
+#' @noRd
+check_sig_tab <- function(sigmas, mus) {
+  if (!is.data.frame(sigmas) | !is.data.frame(mus)) {
+    stop("You need valid data.frames of tracers signature mean and SDs.",
+         " See `tracer_parameters` for examples of each.")
+  }
+  if (!all(dim(sigmas) == dim(mus)) |
+        !all(names(sigmas) == names(mus)) |
+        !all(rownames(sigmas) == rownames(mus))
+      ) {
+    stop("Data frames of tracers signature mean and SDs do not match in",
+         " structure.")
+  }
+  if (names(sigmas)[1] != "Group") {
+    stop("First column name in tracers signature mean and SDs should be",
+         " `Group`.")
+  }
+  if (!all(apply(sigmas[, -1], 2, is.numeric)) |
+        !all(apply(sigmas[, -1], 2, function(x)sum(is.na(x)) == 0))) {
+    stop("Tracers signature columns should all be numeric and cannot contain",
+         " NAs.")
+  }
+}
+
 #' @importFrom dplyr select mutate
 #' @importFrom rlang .data
 #' @export
-mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
+mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab = NULL, model_path,
                                    sigma_ln_rho, m, sample_tracer,
                                    fix_unsampled, hierarchical, ...) {
   yobs <- synth_df$df_stream_1 |>
-    select(select(sig_tab, -.data$Group) |> names())
+    select(select(mu_tab, -.data$Group) |> names())
   reff_df <- synth_df$df_stream_1 |>
     mutate(YR = as.numeric(as.factor(.data$group)))
   out <- list(
@@ -237,11 +261,14 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
   } else {
     out[["sigma_ln_rho"]] <- sigma_ln_rho
   }
+  sig_tab_er <- "You need a valid data.frame of tracers signature SDs."
   if (sample_tracer) {
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
     out[["s"]] <- select(sig_tab, -.data$Group)
     out[["m"]] <- rep(m, nrow(mu_tab))
   }
   if (!fix_unsampled & !sample_tracer) {
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
     out[["s"]] <- select(sig_tab, -.data$Group)
   }
   if (hierarchical) {
@@ -253,8 +280,16 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
 
 #' @importFrom tools file_path_sans_ext
 #' @export
-run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab, sig_tab,
-                                    sigma_ln_rho, ...) {
+run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab,
+                                    sig_tab = NULL, sigma_ln_rho, ...) {
+
+  sig_tab_required <- any(model_choices$sample_tracer | 
+    (!model_choices$fix_unsampled & !model_choices$sample_tracer)
+  )
+  if (sig_tab_required) {
+    sig_tab_er <- "You need a valid data.frame of tracers signature SDs."
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
+  }
   models <- vector(mode = "list", length = nrow(model_choices))
   for (i in seq_len(nrow(model_choices))) {
     build_stancode(model_choices$sample_tracer[i],

@@ -205,7 +205,7 @@ reshape_fattyacids_df <- function(x) {
 #' @importFrom ggplot2 scale_shape_manual labs xlim ylim facet_wrap theme_bw
 #' @importFrom ggplot2 theme element_text guides guide_legend
 #' @importFrom rlang .data
-#' @noRd
+#' @export
 compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
   rbind(
     left_join(
