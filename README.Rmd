@@ -47,7 +47,7 @@ Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 
 ## Synthetic datasets
 
-`mixmustr` comes with two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`. Both are anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils. They differ in their discrepancy between the underlying mixing proportions between data streams 1 and 2, with `synthetic_df_convergent` exhibiting little difference, whereas `synthetic_df_divergent` exhibits larger difference:
+`mixmustr` comes with two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`. Both are anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils. They are hierarchical in structure and simulate an unbalanced design (identical between both datasets) that would be typical of an ecological field sampling design. They differ in their discrepancy between the underlying mixing proportions between data streams 1 and 2, with `synthetic_df_convergent` exhibiting little difference, whereas `synthetic_df_divergent` exhibits larger difference:
 
 ```{r eval=FALSE}
 library(mixmustr)
