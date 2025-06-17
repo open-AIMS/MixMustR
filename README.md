@@ -33,7 +33,9 @@ al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366))
 as well as trophic interactions ([Hoenig et
 al. 2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
 
-<img src="man/figures/diagram.png" width = 800 alt="mixmustr Logo" align="center" />
+<p align="center">
+<img src="man/figures/diagram.png" width = 800/>
+</p>
 
 **Figure 1:** `mixmustr` input data and framework. `mixmustr` relies on
 two independent data streams that are collected from the same *N*
@@ -82,7 +84,13 @@ discrepancy between the underlying mixing proportions between data
 streams 1 and 2, with `synthetic_df_convergent` exhibiting little
 difference, whereas `synthetic_df_divergent` exhibits larger difference:
 
-<img src="man/figures/comp_fig.png" width = 800 align="center" />
+    library(mixmustr)
+    mus <- tracer_parameters$mus
+    compare_mixing_proportions(synthetic_df_divergent, synthetic_df_convergent, mus)
+
+<p align="center">
+<img src="man/figures/comp_fig.png" width = 800/>
+</p>
 
 Although in real applications the user is unlikely to know the
 underlying mixing proportion of data stream 1, these synthetic datasets
@@ -109,18 +117,12 @@ further instructions on how to get the compilers running.
 
 ## Usage
 
+See package documentation and online vignettes for full explanation of
+expected structure of input variables.
+
     library(mixmustr)
     options(mc.cores = parallel::detectCores())
     rstan::rstan_options(auto_write = TRUE)
-    # `tracer_parameters` are built-in source signature datasets (mean and SDs) for
-    #   marine plant carbon sources. See original references in the documentation
-    #   for `bcs_si` and `bcs_fa.
-    # `mixmustr_models` is another built-in dataframe encoding the 8 model variants
-    #   that are currently allowed.
-    # `sigma_ln_rho` is the measurement error of data stream 1, on the natural log
-    #   scale. It encodes the user's degree of trust in how mixing proportions were
-    #   generated from, e.g., eDNA data. It can either be a single numeric value,
-    #   or a matrix of N observations x J sampled sources.
     mus <- tracer_parameters$mus
     sigmas <- tracer_parameters$sigmas
     model_fits <- run_all_mixmustr_models(
