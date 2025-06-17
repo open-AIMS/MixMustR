@@ -1,8 +1,10 @@
-#' @importFrom dplyr %>% mutate
+#' @importFrom dplyr %>% mutate rowwise c_across
+#' @importFrom tidyselect everything
 #' @noRd
 reshape_ref_data <- function(x, target = "df_stream_2", order_ref) {
-  (x[[target]][, order_ref]) %>%
-    mutate(Unsampled = 1 - rowSums(.)) |>
+  (x[[target]][, order_ref]) |>
+    rowwise() |>
+    mutate(Unsampled = 1 - sum(c_across(everything()))) |>
     as.matrix() |>
     abs()
 }
@@ -38,10 +40,12 @@ linear_rescale <- function(x, r_out) {
   r_out[[1]] + p * (r_out[[2]] - r_out[[1]])
 }
 
+#' @importFrom truncnorm rtruncnorm
+#' @importFrom tidyr replace_na
 #' @noRd
 trun_na_zr <- function(...) {
-  truncnorm::rtruncnorm(1, ...) |>
-    tidyr::replace_na(0)
+  rtruncnorm(1, ...) |>
+    replace_na(0)
 }
 
 #' @noRd

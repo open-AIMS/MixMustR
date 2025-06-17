@@ -1,4 +1,5 @@
 library(usethis)
+library(dplyr)
 mixmustr_models <- expand.grid(
   sample_tracer = c(TRUE, FALSE), fix_unsampled = c (TRUE, FALSE),
   hierarchical = c(TRUE, FALSE)

@@ -14,6 +14,7 @@ vary_x <- function(x, yes, ...) {
   }
 }
 
+#' @importFrom stats runif
 #' @noRd
 make_fractionation_mat <- function(x, delta = -0.05) {
   delta <- abs(delta)
@@ -21,12 +22,16 @@ make_fractionation_mat <- function(x, delta = -0.05) {
 }
 
 #' @noRd
+#' @importFrom dplyr group_by count ungroup mutate bind_rows
+#' @importFrom gtools rdirichlet
+#' @importFrom tibble as_tibble
+#' @importFrom rlang .env .data
 produce_mix_props <- function(data, sources, seed_1, seed_2,
                               make_unsampled = TRUE, ...) {
   group_n <- data |>
-    dplyr::group_by(group) |>
-    dplyr::count() |>
-    dplyr::ungroup()
+    group_by(.data$group) |>
+    count() |>
+    ungroup()
   n_groups <- nrow(group_n)
   alphas <- c(1, 1.5, 2, 2.5, 0.5, 2.5) # each value represents a source
   if (length(sources) != length(alphas)) {
@@ -34,20 +39,20 @@ produce_mix_props <- function(data, sources, seed_1, seed_2,
          " of sources.")
   }
   set.seed(seed_1)
-  x <- gtools::rdirichlet(n = n_groups, alpha = alphas) |>
+  x <- rdirichlet(n = n_groups, alpha = alphas) |>
     round(3) |>
     fix_sum_to_one()
   set.seed(seed_2)
   out <- list()
   for (i in seq_len(nrow(group_n))) {
-    out[[i]] <- gtools::rdirichlet(n = group_n$n[i], alpha = x[i, ] * 10) |>
+    out[[i]] <- rdirichlet(n = group_n$n[i], alpha = x[i, ] * 10) |>
       round(3) |>
       fix_sum_to_one() |>
       data.frame() |>
-      tibble::as_tibble() |>
-      dplyr::mutate(group = .env$group_n$group[i])
+      as_tibble() |>
+      mutate(group = .env$group_n$group[i])
   }
-  out <- dplyr::bind_rows(out)
+  out <- bind_rows(out)
   names(out)[seq_along(alphas)] <- sources
   if (make_unsampled) {
     out[, sources] <- vary_x(out[, sources], yes = TRUE, ...)
@@ -55,6 +60,9 @@ produce_mix_props <- function(data, sources, seed_1, seed_2,
   out[, order(names(out))] # ensure alphabetical order of names
 }
 
+#' @importFrom dplyr bind_rows bind_cols mutate case_match arrange case_match
+#' @importFrom purrr map
+#' @importFrom rlang .data
 #' @noRd
 make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
                               truth_stream = 1, template_df, ...) {
@@ -65,156 +73,178 @@ make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
   } else {
     stop("truth_stream can only have value 1 or 2.")
   }
-  out <- dplyr::bind_rows(
+  out <- bind_rows(
     reshape_isotope_df(si_df), reshape_fattyacids_df(fa_df)
   ) |>
-    dplyr::mutate(
-      a = dplyr::case_match(marker, "d(13C/12C)" ~ -Inf, .default = 0), b = Inf
+    mutate(
+      a = case_match(.data$marker, "d(13C/12C)" ~ -Inf, .default = 0), b = Inf
     ) |>
     calc_marker_estimate(...) |>
-    dplyr::arrange(Group, tracer_family, marker) |> # ensure alphabetical order
+    arrange(.data$Group, .data$tracer_family, .data$marker) |> # ensure alphabetical order
     split(f = ~ tracer_family + marker, drop = TRUE) |>
-    purrr::map(function(tracer_df, props_df) {
+    map(function(tracer_df, props_df) {
       (t(props_df[, tracer_df$Group]) * tracer_df$estimate) |>
         colSums() |>
         data.frame(check.names = FALSE) |>
         assign_new_names(unique(tracer_df$marker))
     }, props_df = mixing_props_df)
   # check if bind_cols is working as intended
-  df_stream_1 <- cbind(template_df, dplyr::bind_cols(out))
+  df_stream_1 <- cbind(template_df, bind_cols(out))
   df_stream_2 <- cbind(template_df, stream_2_props)
   stream_1_props <- cbind(template_df, stream_1_props)
   list(df_stream_1 = df_stream_1, df_stream_2 = df_stream_2,
        stream_1_props = stream_1_props)
 }
 
+#' @importFrom dplyr group_by summarise ungroup
+#' @importFrom rlang .data
 #' @noRd
 calc_marker_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
   if (rand_gen) {
     set.seed(seed)
     x$sd <- if (!is.null(sd_)) sd_ else x$sd
-    dplyr::group_by(x, Group, tracer_family, marker) |>
-      dplyr::summarise(
-        estimate = trun_na_zr(a = a, b = b, mean = mean, sd = sd)
+    group_by(x, .data$Group, .data$tracer_family, .data$marker) |>
+      summarise(
+        estimate = trun_na_zr(a = .data$a, b = .data$b, mean = .data$mean,
+                              sd = .data$sd)
       ) |>
-      dplyr::ungroup()
+      ungroup()
   } else {
-    dplyr::group_by(x, Group, tracer_family, marker) |>
-      dplyr::summarise(estimate = mean) |>
-      dplyr::ungroup()
+    group_by(x, .data$Group, .data$tracer_family, .data$marker) |>
+      summarise(estimate = .data$mean) |>
+      ungroup()
   }
 }
 
+#' @importFrom dplyr left_join select mutate across
+#' @importFrom tidyr pivot_wider
+#' @importFrom tidyselect where
+#' @importFrom rlang .data
 #' @noRd
 wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
-  mu_tab <- dplyr::left_join(
+  mu_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      dplyr::select(!c(Study, sd, tracer_family)) |>
-      tidyr::pivot_wider(names_from = "marker", values_from = "mean"),
+      select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
+      pivot_wider(names_from = "marker", values_from = "mean"),
     reshape_fattyacids_df(raw_data_fa) |>
-      dplyr::select(!c(Study, sd, tracer_family)) |>
-      tidyr::pivot_wider(names_from = "marker", values_from = "mean"),
-    by = dplyr::join_by(Group)
+      select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
+      pivot_wider(names_from = "marker", values_from = "mean"),
+    by = "Group"
   )
-  sig_tab <- dplyr::left_join(
+  sig_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      dplyr::select(!c(Study, mean, tracer_family)) |>
-      tidyr::pivot_wider(names_from = "marker", values_from = "sd"),
+      select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
+      pivot_wider(names_from = "marker", values_from = "sd"),
     reshape_fattyacids_df(raw_data_fa) |>
-      dplyr::select(!c(Study, mean, tracer_family)) |>
-      tidyr::pivot_wider(names_from = "marker", values_from = "sd"),
-    by = dplyr::join_by(Group)
+      select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
+      pivot_wider(names_from = "marker", values_from = "sd"),
+    by = "Group"
   ) |>
-    dplyr::mutate(across(where(is.numeric), function(x) {
+    mutate(across(where(is.numeric), function(x) {
       x[x == 0] <- 0.01 # NB: check this. Model can't deal with 0 variance
       x
     }))
   list(mus = mu_tab, sigmas = sig_tab)
 }
 
+#' @importFrom dplyr select left_join mutate case_match
+#' @importFrom tidyr pivot_longer
+#' @importFrom tidyselect starts_with ends_with
+#' @importFrom rlang .data
 #' @noRd
 reshape_isotope_df <- function(x) {
   x |>
-    dplyr::select(-ends_with("sd")) |>
-    tidyr::pivot_longer(
+    select(-ends_with("sd")) |>
+    pivot_longer(
       cols = starts_with("d("), values_to = "mean", names_to = "marker"
     ) |>
-    dplyr::left_join(
+    left_join(
       x |>
-        dplyr::select(-starts_with("d(")) |>
-        tidyr::pivot_longer(
+        select(-starts_with("d(")) |>
+        pivot_longer(
           cols = ends_with("sd"), values_to = "sd", names_to = "marker"
         ) |>
-        dplyr::mutate(
-          marker = dplyr::case_match(marker,
+        mutate(
+          marker = case_match(.data$marker,
             "d13C sd" ~ "d(13C/12C)", "d15N sd" ~ "d(15N/14N)",
             .default = NA
           )
         ),
-      by = dplyr::join_by(Group, Study, marker)
+      by = c("Group", "Study", "marker")
     ) |>
-    dplyr::mutate(tracer_family = "si")
+    mutate(tracer_family = "si")
 }
 
+#' @importFrom dplyr select left_join mutate
+#' @importFrom tidyr pivot_longer
+#' @importFrom tidyselect ends_with
+#' @importFrom rlang .data
 #' @noRd
 reshape_fattyacids_df <- function(x) {
   x |>
-    dplyr::select(-Taxa, -ends_with("(SD)")) |>
-    tidyr::pivot_longer(
-      cols = `24:0`:`20:5w3`, values_to = "mean", names_to = "marker"
+    select(-.data$Taxa, -ends_with("(SD)")) |>
+    pivot_longer(
+      cols = .data$`24:0`:.data$`20:5w3`, values_to = "mean",
+      names_to = "marker"
     ) |>
-    dplyr::left_join(
+    left_join(
       x |>
-        dplyr::select(Group, -Taxa, ends_with("(SD)"), Study) |>
-        tidyr::pivot_longer(
+        select(.data$Group, -.data$Taxa, ends_with("(SD)"), .data$Study) |>
+        pivot_longer(
           cols = ends_with("(SD)"), values_to = "sd", names_to = "marker"
         ) |>
-        dplyr::mutate(marker = gsub(" (SD)", "", marker, fixed = TRUE)),
-      by = dplyr::join_by(Group, Study, marker)
+        mutate(marker = gsub(" (SD)", "", .data$marker, fixed = TRUE)),
+      by = c("Group", "Study", "marker")
     ) |>
-    dplyr::mutate(tracer_family = "fa")
+    mutate(tracer_family = "fa")
 }
 
+#' @importFrom dplyr left_join mutate n
+#' @importFrom tidyr pivot_longer
+#' @importFrom ggplot2 ggplot geom_point aes geom_abline scale_fill_manual
+#' @importFrom ggplot2 scale_shape_manual labs xlim ylim facet_wrap theme_bw
+#' @importFrom ggplot2 theme element_text guides guide_legend
+#' @importFrom rlang .data
 #' @noRd
 compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
   rbind(
-    dplyr::left_join(
+    left_join(
       reshape_ref_data(
         synth_df_d, target = "stream_1_props", order_ref = mu_tab$Group
       ) |>
         data.frame(check.names = FALSE) |>
-        dplyr::mutate(N = seq_len(n())) |>
-        tidyr::pivot_longer(!N, names_to = "source", values_to = "Tracers"),
+        mutate(N = seq_len(n())) |>
+        pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
         synth_df_d, target = "df_stream_2", order_ref = mu_tab$Group
       ) |>
         data.frame(check.names = FALSE) |>
-        dplyr::mutate(N = seq_len(n())) |>
-        tidyr::pivot_longer(!N, names_to = "source", values_to = "eDNA"),
-      by = join_by(N, source)
+        mutate(N = seq_len(n())) |>
+        pivot_longer(!.data$N, names_to = "source", values_to = "eDNA"),
+      by = c("N", "source")
     ) |>
-      dplyr::mutate(`dataset` = "Disagreement (Dataset 2)"),
-    dplyr::left_join(
+      mutate(`dataset` = "Disagreement (Dataset 2)"),
+    left_join(
       reshape_ref_data(
         synth_df_c, target = "stream_1_props", order_ref = mu_tab$Group
       ) |>
         data.frame(check.names = FALSE) |>
-        dplyr::mutate(N = seq_len(n())) |>
-        tidyr::pivot_longer(!N, names_to = "source", values_to = "Tracers"),
+        mutate(N = seq_len(n())) |>
+        pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
         synth_df_c, target = "df_stream_2", order_ref = mu_tab$Group
       ) |>
         data.frame(check.names = FALSE) |>
-        dplyr::mutate(N = seq_len(n())) |>
-        tidyr::pivot_longer(!N, names_to = "source", values_to = "eDNA"),
-      by = join_by(N, source)
+        mutate(N = seq_len(n())) |>
+        pivot_longer(!.data$N, names_to = "source", values_to = "eDNA"),
+      by = c("N", "source")
     ) |>
-      dplyr::mutate(`dataset` = "Agreement (Dataset 1)")
+      mutate(`dataset` = "Agreement (Dataset 1)")
   ) |>
     ggplot(data = _) +
       geom_point(
-        mapping = aes(x = Tracers, y = eDNA, fill = dataset, shape =  dataset),
-        size = 2, alpha = 0.5
+        mapping = aes(x = .data$Tracers, y = .data$eDNA, fill = .data$dataset,
+                      shape = .data$dataset), size = 2, alpha = 0.5
       ) +
       geom_abline(slope = 1, linetype = 2) +
       scale_fill_manual(values = c("dodgerblue3", "tomato3")) +
@@ -225,7 +255,7 @@ compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
            fill = "Matrices in:", shape = "Matrices in:") +
       xlim(c(0, 1)) +
       ylim(c(0, 1)) +
-      facet_wrap(~source) +
+      facet_wrap(~ .data$source) +
       theme_bw() +
       theme(
         axis.title = element_text(size = 14),

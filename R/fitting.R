@@ -104,7 +104,8 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
       "\t}\n"
     )
   }
-  sd_term <- ifelse(sample_tracer, "sqrt(p[n][j]^2 * omega[j, k]^2)", "sigma[k]")
+  sd_term <- ifelse(sample_tracer, "sqrt(p[n][j]^2 * omega[j, k]^2)",
+                    "sigma[k]")
   script <- c(script,
     "\t// Mixture model\n",
     "\tfor (n in 1:N) {\n",
@@ -206,20 +207,22 @@ check_sigma_ln_rho <- function(x, ref) {
   }
 }
 
+#' @importFrom dplyr select mutate
+#' @importFrom rlang .data
 #' @export
 mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
                                    sigma_ln_rho, m, sample_tracer,
                                    fix_unsampled, hierarchical, ...) {
   yobs <- synth_df$df_stream_1 |>
-    dplyr::select(dplyr::select(sig_tab, -Group) |> names())
+    select(select(sig_tab, -.data$Group) |> names())
   reff_df <- synth_df$df_stream_1 |>
-    dplyr::mutate(YR = as.numeric(as.factor(group)))
+    mutate(YR = as.numeric(as.factor(.data$group)))
   out <- list(
     N = nrow(yobs),
     J = nrow(mu_tab), # sources
     K = ncol(yobs), # tracers
     Y = yobs,
-    x = dplyr::select(mu_tab, -Group),
+    x = select(mu_tab, -.data$Group),
     ln_rho = reshape_ref_data(
       synth_df, target = "df_stream_2", order_ref = mu_tab$Group
     ) |>
@@ -235,11 +238,11 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
     out[["sigma_ln_rho"]] <- sigma_ln_rho
   }
   if (sample_tracer) {
-    out[["s"]] <- dplyr::select(sig_tab, -Group)
+    out[["s"]] <- select(sig_tab, -.data$Group)
     out[["m"]] <- rep(m, nrow(mu_tab))
   }
   if (!fix_unsampled & !sample_tracer) {
-    out[["s"]] <- dplyr::select(sig_tab, -Group)
+    out[["s"]] <- select(sig_tab, -.data$Group)
   }
   if (hierarchical) {
     out[["R"]] <- max(reff_df$YR)
@@ -248,6 +251,7 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
   out
 }
 
+#' @importFrom tools file_path_sans_ext
 #' @export
 run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab, sig_tab,
                                     sigma_ln_rho, ...) {
@@ -264,7 +268,7 @@ run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab, sig_tab,
       fix_unsampled = model_choices$fix_unsampled[i],
       hierarchical = model_choices$hierarchical[i]
     )
-    synth_n_i <- tools::file_path_sans_ext(basename(model_path))
+    synth_n_i <- file_path_sans_ext(basename(model_path))
     timing <- system.time({
       model <- run_mixmod(model_path, synth_n_i, data = sdata, ...)
     })
@@ -273,10 +277,11 @@ run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab, sig_tab,
   models
 }
 
+#' @importFrom tools file_path_sans_ext
 #' @export
 run_mixmod <- function(model_path, synth_n, ...) {
   model_name <- basename(model_path) |>
-    tools::file_path_sans_ext() |>
+    file_path_sans_ext() |>
     paste0("_", synth_n)
   rstan::stan(file = model_path, model_name = model_name, ...)
 }
