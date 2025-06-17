@@ -132,4 +132,4 @@ further instructions on how to get the compilers running.
 
 `mixmustr` is provided by the [Australian Institute of Marine
 Science](https://www.aims.gov.au/) under the MIT License
-([MIT](https://opensource.org/license/mit/)).
+([MIT](https://opensource.org/license/mit)).
