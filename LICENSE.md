@@ -1,8 +1,6 @@
-# Package licensed under the "MIT License (MIT)"
+# MIT License
 
-## The MIT License (MIT)
-
-Copyright (c) `2025-` `Australian Institute of Marine Science`
+Copyright (c) 2025 Australian Institute of Marine Science
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
