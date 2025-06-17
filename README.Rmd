@@ -72,8 +72,6 @@ for further instructions on how to get the compilers running.
 
 ## Usage
 
-The package requires 
-
 ```{r eval=FALSE}
 library(mixmustr)
 options(mc.cores = parallel::detectCores())
