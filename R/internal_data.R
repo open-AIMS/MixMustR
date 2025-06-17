@@ -1,4 +1,4 @@
-#' @export
+#' @noRd
 vary_x <- function(x, yes, ...) {
   if (yes) {
     unsampled_diff <- make_fractionation_mat(x, ...)
@@ -14,13 +14,13 @@ vary_x <- function(x, yes, ...) {
   }
 }
 
-#' @export
+#' @noRd
 make_fractionation_mat <- function(x, delta = -0.05) {
   delta <- abs(delta)
   matrix(runif(nrow(x) * ncol(x), -1 * delta, delta), nrow(x), ncol(x))
 }
 
-#' @export
+#' @noRd
 produce_mix_props <- function(data, sources, seed_1, seed_2,
                               make_unsampled = TRUE, ...) {
   group_n <- data |>
@@ -55,7 +55,7 @@ produce_mix_props <- function(data, sources, seed_1, seed_2,
   out[, order(names(out))] # ensure alphabetical order of names
 }
 
-#' @export
+#' @noRd
 make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
                               truth_stream = 1, template_df, ...) {
   if (truth_stream == 1) {
@@ -81,14 +81,14 @@ make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
         assign_new_names(unique(tracer_df$marker))
     }, props_df = mixing_props_df)
   # check if bind_cols is working as intended
-  sim_data <- cbind(template_df, dplyr::bind_cols(out))
-  stream_1_df <- cbind(template_df, stream_1_props)
-  stream_2_df <- cbind(template_df, stream_2_props)
-  list(sim_data = sim_data, stream_1_df = stream_1_df,
-       stream_2_df = stream_2_df)
+  df_stream_1 <- cbind(template_df, dplyr::bind_cols(out))
+  df_stream_2 <- cbind(template_df, stream_2_props)
+  stream_1_props <- cbind(template_df, stream_1_props)
+  list(df_stream_1 = df_stream_1, df_stream_2 = df_stream_2,
+       stream_1_props = stream_1_props)
 }
 
-#' @export
+#' @noRd
 calc_marker_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
   if (rand_gen) {
     set.seed(seed)
@@ -105,7 +105,7 @@ calc_marker_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
   }
 }
 
-#' @export
+#' @noRd
 wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
   mu_tab <- dplyr::left_join(
     reshape_isotope_df(raw_data_si) |>
@@ -132,7 +132,7 @@ wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
   list(mus = mu_tab, sigmas = sig_tab)
 }
 
-#' @export
+#' @noRd
 reshape_isotope_df <- function(x) {
   x |>
     dplyr::select(-ends_with("sd")) |>
@@ -156,7 +156,7 @@ reshape_isotope_df <- function(x) {
     dplyr::mutate(tracer_family = "si")
 }
 
-#' @export
+#' @noRd
 reshape_fattyacids_df <- function(x) {
   x |>
     dplyr::select(-Taxa, -ends_with("(SD)")) |>
@@ -173,4 +173,70 @@ reshape_fattyacids_df <- function(x) {
       by = dplyr::join_by(Group, Study, marker)
     ) |>
     dplyr::mutate(tracer_family = "fa")
+}
+
+#' @noRd
+compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
+  rbind(
+    dplyr::left_join(
+      reshape_ref_data(
+        synth_df_d, target = "stream_1_props", order_ref = mu_tab$Group
+      ) |>
+        data.frame(check.names = FALSE) |>
+        dplyr::mutate(N = seq_len(n())) |>
+        tidyr::pivot_longer(!N, names_to = "source", values_to = "Tracers"),
+      reshape_ref_data(
+        synth_df_d, target = "df_stream_2", order_ref = mu_tab$Group
+      ) |>
+        data.frame(check.names = FALSE) |>
+        dplyr::mutate(N = seq_len(n())) |>
+        tidyr::pivot_longer(!N, names_to = "source", values_to = "eDNA"),
+      by = join_by(N, source)
+    ) |>
+      dplyr::mutate(`dataset` = "Disagreement (Dataset 2)"),
+    dplyr::left_join(
+      reshape_ref_data(
+        synth_df_c, target = "stream_1_props", order_ref = mu_tab$Group
+      ) |>
+        data.frame(check.names = FALSE) |>
+        dplyr::mutate(N = seq_len(n())) |>
+        tidyr::pivot_longer(!N, names_to = "source", values_to = "Tracers"),
+      reshape_ref_data(
+        synth_df_c, target = "df_stream_2", order_ref = mu_tab$Group
+      ) |>
+        data.frame(check.names = FALSE) |>
+        dplyr::mutate(N = seq_len(n())) |>
+        tidyr::pivot_longer(!N, names_to = "source", values_to = "eDNA"),
+      by = join_by(N, source)
+    ) |>
+      dplyr::mutate(`dataset` = "Agreement (Dataset 1)")
+  ) |>
+    ggplot(data = _) +
+      geom_point(
+        mapping = aes(x = Tracers, y = eDNA, fill = dataset, shape =  dataset),
+        size = 2, alpha = 0.5
+      ) +
+      geom_abline(slope = 1, linetype = 2) +
+      scale_fill_manual(values = c("dodgerblue3", "tomato3")) +
+      scale_shape_manual(values = 21:22) +
+      labs(x = "From chemical tracers (data stream 1)",
+           y = "From eDNA (data stream 2)",
+           title = "Simulated mixing proportions",
+           fill = "Matrices in:", shape = "Matrices in:") +
+      xlim(c(0, 1)) +
+      ylim(c(0, 1)) +
+      facet_wrap(~source) +
+      theme_bw() +
+      theme(
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 10),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 12),
+        legend.position = "inside",
+        legend.position.inside = c(0.55, 0.2)
+      ) +
+      guides(
+        shape = guide_legend(override.aes = list(size = 3.5)),
+        fill = guide_legend(override.aes = list(alpha = 1))
+      )
 }

@@ -210,9 +210,9 @@ check_sigma_ln_rho <- function(x, ref) {
 mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
                                    sigma_ln_rho, m, sample_tracer,
                                    fix_unsampled, hierarchical, ...) {
-  yobs <- synth_df$sim_data |>
+  yobs <- synth_df$df_stream_1 |>
     dplyr::select(dplyr::select(sig_tab, -Group) |> names())
-  reff_df <- synth_df$sim_data |>
+  reff_df <- synth_df$df_stream_1 |>
     dplyr::mutate(YR = as.numeric(as.factor(group)))
   out <- list(
     N = nrow(yobs),
@@ -221,7 +221,7 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab, model_path,
     Y = yobs,
     x = dplyr::select(mu_tab, -Group),
     ln_rho = reshape_ref_data(
-      synth_df, target = "stream_2_df", order_ref = mu_tab$Group
+      synth_df, target = "df_stream_2", order_ref = mu_tab$Group
     ) |>
       as.matrix() |>
       abs_log(adjust = 0.0001)

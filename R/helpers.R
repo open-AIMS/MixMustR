@@ -1,6 +1,6 @@
 #' @importFrom dplyr %>% mutate
 #' @noRd
-reshape_ref_data <- function(x, target = "stream_1_df", order_ref) {
+reshape_ref_data <- function(x, target = "df_stream_2", order_ref) {
   (x[[target]][, order_ref]) %>%
     mutate(Unsampled = 1 - rowSums(.)) |>
     as.matrix() |>
