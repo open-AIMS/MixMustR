@@ -128,10 +128,18 @@ expected structure of input variables.
     rstan::rstan_options(auto_write = TRUE)
     mus <- tracer_parameters$mus
     sigmas <- tracer_parameters$sigmas
-    model_fits <- run_all_mixmustr_models(
+    model_fits <- run_mixmustr_models(
       mixmustr_models, synthetic_df_convergent, mus, sigmas, sigma_ln_rho = 0.1,
       iter = 1e4, warmup = 5e3, chains = 4, cores = 4
     )
+    # then visualise a particular output
+    make_post_prop_long(model_fits[[1]]$model, mus, synthetic_df_convergent,
+                        target = "df_stream_1", n = 1)|>
+      plot_multiple_faceted_scatter_avg() +
+      theme(legend.position = "none") +
+      labs(y = "Observed (simulated) from chemical tracers (data stream 1)",
+           title = "Model fit performance mixing proportions",
+           subtitle = "Synthetic dataset of high agreement")
 
 ## Further Information
 
