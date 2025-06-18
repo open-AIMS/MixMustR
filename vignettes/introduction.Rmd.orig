@@ -1,6 +1,6 @@
 ---
 title: "Introduction to mixmustr"
-author: "Your Name"
+author: "Diego Barneche and Chris Fulton"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   fig.path = "vignette-fig-",
   fig.asp = 0.8,
-  out.width = "60%",
+  out.width = "90%",
   fig.align = "center",
   dev = "pdf",
   eval = identical(Sys.getenv("NOT_CRAN"), "true")

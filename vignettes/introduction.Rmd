@@ -1,6 +1,6 @@
 ---
 title: "Introduction to mixmustr"
-author: "Your Name"
+author: "Diego Barneche and Chris Fulton"
 date: "2025-06-18"
 output: rmarkdown::html_vignette
 vignette: >
@@ -132,7 +132,7 @@ make_post_prop_long(
 ```
 
 <div class="figure" style="text-align: center">
-<embed src="vignette-fig-unnamed-chunk-4-1.pdf" title="plot of chunk unnamed-chunk-4" width="60%" type="application/pdf" />
+<embed src="vignette-fig-unnamed-chunk-4-1.pdf" title="plot of chunk unnamed-chunk-4" width="90%" type="application/pdf" />
 <p class="caption">plot of chunk unnamed-chunk-4</p>
 </div>
 
