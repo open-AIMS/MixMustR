@@ -1,7 +1,7 @@
 ---
 title: "Introduction to mixmustr"
 author: "Your Name"
-date: "2025-06-18"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to mixmustr}
@@ -9,7 +9,22 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+set.seed(333)
+stopifnot(require(knitr))
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.path = "vignette-fig-",
+  fig.asp = 0.8,
+  out.width = "60%",
+  fig.align = "center",
+  dev = "pdf",
+  eval = identical(Sys.getenv("NOT_CRAN"), "true")
+)
+```
 
 # Overview
 
@@ -66,8 +81,7 @@ These datasets were generated using the internal `make_mixture_data` function, w
 
 We begin by loading the package and setting options for parallel computing and Stan:
 
-
-``` r
+```{r message = FALSE, warning = FALSE, results = "hide"}
 library(mixmustr)
 ```
 
@@ -77,8 +91,7 @@ library(mixmustr)
 
 We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source.
 
-
-``` r
+```{r}
 mus <- tracer_parameters$mus
 sigmas <- tracer_parameters$sigmas
 ```
@@ -91,8 +104,7 @@ These are required to inform the model about each source's chemical signature an
 
 The core function to run models is `run_mixmustr_models()`. This function allows you to run multiple models defined in the built-in `mixmustr_models` data frame.
 
-
-``` r
+```{r, results = 'hide', message = FALSE, warning = FALSE}
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, mus, sigmas,
   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
@@ -115,8 +127,7 @@ This function:
 
 Once a model is fit, you can visualize the performance using the built-in plotting tools.
 
-
-``` r
+```{r fig.width = 7, fig.height = 7}
 library(ggplot2)
 make_post_prop_long(
   model_fits[[1]]$model, mus, synthetic_df_convergent, target = "df_stream_2",
@@ -130,11 +141,6 @@ make_post_prop_long(
     subtitle = "Synthetic dataset of high agreement"
   )
 ```
-
-<div class="figure" style="text-align: center">
-<embed src="vignette-fig-unnamed-chunk-4-1.pdf" title="plot of chunk unnamed-chunk-4" width="60%" type="application/pdf" />
-<p class="caption">plot of chunk unnamed-chunk-4</p>
-</div>
 
 This plot compares observed vs. predicted mixing proportions for data stream 2, helping you assess how well the model captures the underlying signal.
 
