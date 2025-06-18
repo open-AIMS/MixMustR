@@ -1,3 +1,52 @@
+#' build_stancode
+#'
+#' Builds underlying Stan code for \code{\link{mixmustr}} model of choice.
+#'
+#' @param sample_tracer A logical vector, defaults to FALSE.
+# Should the model estimate uncertainty around sampled sources signatures?
+#' @param fix_unsampled A logical vector, defaults to FALSE.
+# Should the model estimate uncertainty around the unsampled source
+# signatures or should it be fixed to mean across all sampled sources?
+#' @param hierarchical A logical vector, defaults to FALSE.
+#' Should all observations be treated as independent or should the model include
+#' a hierarchical grouping structure?
+#' @param code_path A character vector indicating the file path to the
+# corresponding Stan model file, based on the parameter combination.
+#' 
+#' @details \code{\link{mixmustr}} currently allows for eight model variants
+#' which result from three user-driven binary choices: 1) should the model only
+#' ingest the mean sampled-source tracer signatures (equivalent to
+#' "residual-only error" structure of MixSIAR; Stock et al. 2018) or should it
+#' incorporate their uncertainty based on user-provided mean, variance and
+#' sample size information (equivalent to "process error" structure of MixSIAR);
+#' 2) should the unsampled-source tracer signatures be fixed at the mean across
+#' all sampled sources, or should they rather be estimated based on a prior
+#' informed by the mean and variance across the sampled tracer signatures? and
+#' 3) should all observations be treated as independent or should the model
+#' include a hierarchical grouping structure?
+#' 
+#' Given these three choices, \code{\link{build_stancode}} saves a stan code
+#' to an output directory of the users' choosing. Nothing is returned.
+#' 
+#' @references
+#' Stock BC, Jackson AL, Ward EJ, Parnell AC, Phillips DL, Semmens BX (2018)
+#' Analyzing mixing systems using a new generation of Bayesian tracer mixing
+#' models. PeerJ, 6:e5096. doi:10.7717/peerj.5096.
+#'
+#' @return Nothing.
+#' 
+#' @seealso
+#'   \code{\link{run_mixmustr_models}}
+#' 
+#' @examples
+#' library(mixmustr)
+#' data(mixmustr_models)
+#'
+#' build_stancode(mixmustr_models$sample_tracer[1],
+#'                mixmustr_models$fix_unsampled[1],
+#'                mixmustr_models$hierarchical[1],
+#'                mixmustr_models$code_path[1])
+#' 
 #' @export
 build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
                            hierarchical = FALSE, code_path) {
@@ -220,9 +269,9 @@ check_sig_tab <- function(sigmas, mus) {
     stop("Data frames of tracers signature mean and SDs do not match in",
          " structure.")
   }
-  if (names(sigmas)[1] != "Group") {
+  if (names(sigmas)[1] != "source") {
     stop("First column name in tracers signature mean and SDs should be",
-         " `Group`.")
+         " `source`.")
   }
   if (!all(apply(sigmas[, -1], 2, is.numeric)) |
         !all(apply(sigmas[, -1], 2, function(x)sum(is.na(x)) == 0))) {
@@ -231,24 +280,150 @@ check_sig_tab <- function(sigmas, mus) {
   }
 }
 
+#' mixmustr_wrangle_input
+#'
+#' Creates the input list for the Stan model.
+#'
+#' @inheritParams build_stancode
+#' @param data_streams_list A list containing the input
+#' data streams for the model. It should include two
+#' data frames named `df_stream_1` and`df_stream_2`. See
+#' details for the expected structure of these.
+#' @param mu_tab A data frame containing the mean tracer
+#' signatures for each source. The first column should be named `source`, and
+#' the remaining columns should contain numeric tracer values.
+#' @param sig_tab (Optional) A data frame containing the
+#' standard deviations of tracer signatures for each source. The structure must
+#' match `mu_tab`. Required if `sample_tracer` is `TRUE` or if `fix_unsampled`
+#' is `FALSE` and `sample_tracer` is `FALSE`.
+#' @param model_path A character string specifying the path to the Stan model
+#' file.
+#' @param sigma_ln_rho A numeric value or matrix specifying the confidence
+#' around the log mixing proportions. If a matrix, it must be of dimensions
+#' N X J, with N being the number of observations and J being the number of
+#' sources.
+#' @param m A numeric value specifying the sample size for each source. Used
+#' when `sample_tracer` is `TRUE`.
+#' @param ... Additional unused arguments.
+#'
 #' @importFrom dplyr select mutate
 #' @importFrom rlang .data
+#' 
+#' @details
+#' The `mixmustr_wrangle_input` function prepares the input data for the Stan
+#' model:
+#'
+#' - `data_streams_list`: A list containing two data frames:
+#'   - `df_stream_1`: Contains the observed data. If this is a hierarchical
+#' dataset, the first column should be named `group`, representing the group
+#' labels, and the remaining columns should contain numeric tracer values.
+#'   - `df_stream_2`: Contains the log mixing proportions. It must have the same
+#' number of rows (`N`) as `df_stream_1`. If the design is hierarchical, the
+#' first column should be named `group`, matching the `group` column in
+#' `df_stream_1`. The remaining columns (`source1`, `source2`, etc.) must
+#' contain proportions (i.e., row sums up to 1, and no negative values).
+#'
+#' - `mu_tab`: A data frame containing the mean tracer signatures for each
+#' source. The first column should be named `source`, and the remaining columns
+#' should contain numeric tracer values, with names matching those in
+#' data_streams_list$df_stream_1.
+#'
+#' - `sig_tab`: A data frame containing the standard deviations of tracer
+#' signatures for each source. The structure must match that of `mu_tab`. It
+#' cannot contain NAs.
+#'
+#' - `model_path`: A character string specifying the path to the Stan model
+#' file.
+#'
+#' - `sigma_ln_rho`: A numeric value or matrix specifying the confidence around
+#' the log mixing proportions. If a matrix, it must have dimensions `N x (J +
+#' 1)`, with N being the number of observations and J being the number of
+#' sources. The additional J + 1 column represents the unsampled source, making
+#' the final row sums across the J + 1 columns total 1.
+#'
+#' - `m`: A numeric value specifying the sample size for each source. Used when
+#' `sample_tracer` is `TRUE`.
+#'
+#' - `sample_tracer`: Logical. If `TRUE`, the model estimates uncertainty
+#' around sampled source signatures.
+#'
+#' - `fix_unsampled`: Logical. If `TRUE`, the model fixes unsampled source signatures to the mean across all sampled sources.
+#'
+#' - `hierarchical`: Logical. If `TRUE`, the model includes a hierarchical grouping structure.
+#' 
+#' @return A list containing all the data elements necessary to run the Stan
+#' code contained within `model_path`.
+#' 
+#' @seealso
+#'   \code{\link{run_mixmustr_models}}
+#' 
+#' @examples
+#' library(mixmustr)
+#' data(mixmustr_models)
+#' 
+#' # Example input data
+#' synthetic_list <- list(
+#'   df_stream_1 = data.frame(
+#'     group = c("A", "A", "B", "B"),
+#'     tracer1 = c(1.2, 1.3, 2.1, 2.2),
+#'     tracer2 = c(3.4, 3.5, 4.6, 4.7)
+#'   ),
+#'   df_stream_2 = data.frame(
+#'     group = c("A", "A", "B", "B"),
+#'     source1 = c(0.6, 0.4, 0.7, 0.3),
+#'     source2 = c(0.4, 0.6, 0.3, 0.7)
+#'   )
+#' )
+#' 
+#' mu_tab <- data.frame(
+#'   source = c("source1", "source2"),
+#'   tracer1 = c(1.25, 2.15),
+#'   tracer2 = c(3.45, 4.65)
+#' )
+#' 
+#' sig_tab <- data.frame(
+#'   source = c("source1", "source2"),
+#'   tracer1 = c(0.05, 0.1),
+#'   tracer2 = c(0.15, 0.2)
+#' )
+#' 
+#' # Example parameters
+#' model_path <- tempfile(fileext = ".stan")
+#' sigma_ln_rho <- 0.01
+#' m <- 10
+#' sample_tracer <- TRUE
+#' fix_unsampled <- FALSE
+#' hierarchical <- TRUE
+#' 
+#' # Call the function
+#' input_list <- mixmustr_wrangle_input(
+#'   data_streams_list = synthetic_list,
+#'   mu_tab = mu_tab,
+#'   sig_tab = sig_tab,
+#'   model_path = model_path,
+#'   sigma_ln_rho = sigma_ln_rho,
+#'   m = m,
+#'   sample_tracer = sample_tracer,
+#'   fix_unsampled = fix_unsampled,
+#'   hierarchical = hierarchical
+#' )
+#' 
 #' @export
-mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab = NULL, model_path,
-                                   sigma_ln_rho, m, sample_tracer,
+mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
+                                   model_path, sigma_ln_rho, m, sample_tracer,
                                    fix_unsampled, hierarchical, ...) {
-  yobs <- synth_df$df_stream_1 |>
-    select(select(mu_tab, -.data$Group) |> names())
-  reff_df <- synth_df$df_stream_1 |>
+  yobs <- data_streams_list$df_stream_1 |>
+    select(select(mu_tab, -.data$source) |> names())
+  reff_df <- data_streams_list$df_stream_1 |>
     mutate(YR = as.numeric(as.factor(.data$group)))
   out <- list(
     N = nrow(yobs),
     J = nrow(mu_tab), # sources
     K = ncol(yobs), # tracers
     Y = yobs,
-    x = select(mu_tab, -.data$Group),
+    x = select(mu_tab, -.data$source),
     ln_rho = reshape_ref_data(
-      synth_df, target = "df_stream_2", order_ref = mu_tab$Group
+      data_streams_list, target = "df_stream_2", order_ref = mu_tab$source
     ) |>
       as.matrix() |>
       abs_log(adjust = 0.0001)
@@ -264,12 +439,12 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab = NULL, model_path,
   sig_tab_er <- "You need a valid data.frame of tracers signature SDs."
   if (sample_tracer) {
     if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
-    out[["s"]] <- select(sig_tab, -.data$Group)
+    out[["s"]] <- select(sig_tab, -.data$source)
     out[["m"]] <- rep(m, nrow(mu_tab))
   }
   if (!fix_unsampled & !sample_tracer) {
     if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
-    out[["s"]] <- select(sig_tab, -.data$Group)
+    out[["s"]] <- select(sig_tab, -.data$source)
   }
   if (hierarchical) {
     out[["R"]] <- max(reff_df$YR)
@@ -278,10 +453,49 @@ mixmustr_wrangle_input <- function(synth_df, mu_tab, sig_tab = NULL, model_path,
   out
 }
 
+#' run_mixmustr_models
+#' 
+#' Runs a set of Stan models.
+#' 
+#' @inheritParams mixmustr_wrangle_input
+#' @param model_choices A data frame specifying the model configurations to
+#' run. Each row should represent a model, with columns indicating the values
+#' for `sample_tracer`, `fix_unsampled`, `hierarchical`, and `code_path`.
+#' @param ... Additional arguments passed to \code{\link[rstan]{stan}}, such as 
+#' `iter`, `chains`, or `control`.
+#'
+#' @details
+#' The `run_mixmustr_models` function automates the process of running 
+#' multiple `mixmustr` models based on user-specified configurations. It builds 
+#' the Stan code for each model, prepares the input data, and runs the models 
+#' sequentially. The results are returned as a list, with each element 
+#' containing the run time and model output for a specific configuration. For
+#' convenience, `mixmustr` provides the user with a built-in data frame
+#' containing all of the potential allowed models \code{\link{mixmustr_models}}.
+#'
+#' @return A list where each element corresponds to a model configuration, 
+#' containing the run time and model output.
+#'
+#' @seealso
+#'   \code{\link{mixmustr_models}},
+#'   \code{\link{mixmustr_wrangle_input}}
+#'
 #' @importFrom tools file_path_sans_ext
+#' 
+#' @examples
+#' \dontrun{
+#' library(mixmustr)
+#' mus <- tracer_parameters$mus
+#' sigmas <- tracer_parameters$sigmas
+#' model_fits <- run_mixmustr_models(
+#'   mixmustr_models[1, ], synthetic_df_convergent, mus, sigmas,
+#'   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
+#' )
+#' }
+#' 
 #' @export
-run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab,
-                                    sig_tab = NULL, sigma_ln_rho, ...) {
+run_mixmustr_models <- function(model_choices, data_streams_list, mu_tab,
+                                sig_tab = NULL, sigma_ln_rho, ...) {
 
   sig_tab_required <- any(model_choices$sample_tracer | 
     (!model_choices$fix_unsampled & !model_choices$sample_tracer)
@@ -298,25 +512,39 @@ run_all_mixmustr_models <- function(model_choices, synth_df, mu_tab,
                    model_choices$code_path[i])
     model_path <- model_choices$code_path[i]
     sdata <- mixmustr_wrangle_input(
-      synth_df, mu_tab, sig_tab, model_path, sigma_ln_rho = sigma_ln_rho,
-      m = 100, sample_tracer = model_choices$sample_tracer[i],
+      data_streams_list, mu_tab, sig_tab, model_path,
+      sigma_ln_rho = sigma_ln_rho, m = 100,
+      sample_tracer = model_choices$sample_tracer[i],
       fix_unsampled = model_choices$fix_unsampled[i],
       hierarchical = model_choices$hierarchical[i]
     )
-    synth_n_i <- file_path_sans_ext(basename(model_path))
+    mod_name_suffix_i <- file_path_sans_ext(basename(model_path))
     timing <- system.time({
-      model <- run_mixmod(model_path, synth_n_i, data = sdata, ...)
+      model <- run_mixmod(model_path, mod_name_suffix_i, data = sdata, ...)
     })
     models[[i]] <- list(timing = timing, model = model)
   }
   models
 }
 
+#' run_mixmod
+#' 
+#' Wrapper to run mixture model in Stan.
+#' 
+#' @inheritParams mixmustr_wrangle_input
+#' @param mod_name_suffix A character string used to create a unique model name.
+#' @param ... Additional arguments passed to \code{\link[rstan]{stan}}.
+#'
 #' @importFrom tools file_path_sans_ext
+#' @importFrom rstan stan
+#' 
+#' @seealso
+#'   \code{\link{run_mixmustr_models}}
+#' 
 #' @export
-run_mixmod <- function(model_path, synth_n, ...) {
+run_mixmod <- function(model_path, mod_name_suffix, ...) {
   model_name <- basename(model_path) |>
     file_path_sans_ext() |>
-    paste0("_", synth_n)
-  rstan::stan(file = model_path, model_name = model_name, ...)
+    paste0("_", mod_name_suffix)
+  stan(file = model_path, model_name = model_name, ...)
 }

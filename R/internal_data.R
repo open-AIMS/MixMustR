@@ -77,16 +77,16 @@ make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
     reshape_isotope_df(si_df), reshape_fattyacids_df(fa_df)
   ) |>
     mutate(
-      a = case_match(.data$marker, "d(13C/12C)" ~ -Inf, .default = 0), b = Inf
+      a = case_match(.data$tracer, "d(13C/12C)" ~ -Inf, .default = 0), b = Inf
     ) |>
-    calc_marker_estimate(...) |>
-    arrange(.data$Group, .data$tracer_family, .data$marker) |> # ensure alphabetical order
-    split(f = ~ tracer_family + marker, drop = TRUE) |>
+    calc_tracer_estimate(...) |>
+    arrange(.data$source, .data$tracer_family, .data$tracer) |> # ensure alphabetical order
+    split(f = ~ tracer_family + tracer, drop = TRUE) |>
     map(function(tracer_df, props_df) {
-      (t(props_df[, tracer_df$Group]) * tracer_df$estimate) |>
+      (t(props_df[, tracer_df$source]) * tracer_df$estimate) |>
         colSums() |>
         data.frame(check.names = FALSE) |>
-        assign_new_names(unique(tracer_df$marker))
+        assign_new_names(unique(tracer_df$tracer))
     }, props_df = mixing_props_df)
   # check if bind_cols is working as intended
   df_stream_1 <- cbind(template_df, bind_cols(out))
@@ -99,18 +99,18 @@ make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
 #' @importFrom dplyr group_by summarise ungroup
 #' @importFrom rlang .data
 #' @noRd
-calc_marker_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
+calc_tracer_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
   if (rand_gen) {
     set.seed(seed)
     x$sd <- if (!is.null(sd_)) sd_ else x$sd
-    group_by(x, .data$Group, .data$tracer_family, .data$marker) |>
+    group_by(x, .data$source, .data$tracer_family, .data$tracer) |>
       summarise(
         estimate = trun_na_zr(a = .data$a, b = .data$b, mean = .data$mean,
                               sd = .data$sd)
       ) |>
       ungroup()
   } else {
-    group_by(x, .data$Group, .data$tracer_family, .data$marker) |>
+    group_by(x, .data$source, .data$tracer_family, .data$tracer) |>
       summarise(estimate = .data$mean) |>
       ungroup()
   }
@@ -125,20 +125,20 @@ wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
   mu_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
       select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
-      pivot_wider(names_from = "marker", values_from = "mean"),
+      pivot_wider(names_from = "tracer", values_from = "mean"),
     reshape_fattyacids_df(raw_data_fa) |>
       select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
-      pivot_wider(names_from = "marker", values_from = "mean"),
-    by = "Group"
+      pivot_wider(names_from = "tracer", values_from = "mean"),
+    by = "source"
   )
   sig_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
       select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
-      pivot_wider(names_from = "marker", values_from = "sd"),
+      pivot_wider(names_from = "tracer", values_from = "sd"),
     reshape_fattyacids_df(raw_data_fa) |>
       select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
-      pivot_wider(names_from = "marker", values_from = "sd"),
-    by = "Group"
+      pivot_wider(names_from = "tracer", values_from = "sd"),
+    by = "source"
   ) |>
     mutate(across(where(is.numeric), function(x) {
       x[x == 0] <- 0.01 # NB: check this. Model can't deal with 0 variance
@@ -156,21 +156,21 @@ reshape_isotope_df <- function(x) {
   x |>
     select(-ends_with("sd")) |>
     pivot_longer(
-      cols = starts_with("d("), values_to = "mean", names_to = "marker"
+      cols = starts_with("d("), values_to = "mean", names_to = "tracer"
     ) |>
     left_join(
       x |>
         select(-starts_with("d(")) |>
         pivot_longer(
-          cols = ends_with("sd"), values_to = "sd", names_to = "marker"
+          cols = ends_with("sd"), values_to = "sd", names_to = "tracer"
         ) |>
         mutate(
-          marker = case_match(.data$marker,
+          tracer = case_match(.data$tracer,
             "d13C sd" ~ "d(13C/12C)", "d15N sd" ~ "d(15N/14N)",
             .default = NA
           )
         ),
-      by = c("Group", "Study", "marker")
+      by = c("source", "Study", "tracer")
     ) |>
     mutate(tracer_family = "si")
 }
@@ -185,38 +185,69 @@ reshape_fattyacids_df <- function(x) {
     select(-.data$Taxa, -ends_with("(SD)")) |>
     pivot_longer(
       cols = .data$`24:0`:.data$`20:5w3`, values_to = "mean",
-      names_to = "marker"
+      names_to = "tracer"
     ) |>
     left_join(
       x |>
-        select(.data$Group, -.data$Taxa, ends_with("(SD)"), .data$Study) |>
+        select(.data$source, -.data$Taxa, ends_with("(SD)"), .data$Study) |>
         pivot_longer(
-          cols = ends_with("(SD)"), values_to = "sd", names_to = "marker"
+          cols = ends_with("(SD)"), values_to = "sd", names_to = "tracer"
         ) |>
-        mutate(marker = gsub(" (SD)", "", .data$marker, fixed = TRUE)),
-      by = c("Group", "Study", "marker")
+        mutate(tracer = gsub(" (SD)", "", .data$tracer, fixed = TRUE)),
+      by = c("source", "Study", "tracer")
     ) |>
     mutate(tracer_family = "fa")
 }
 
+#' Compare Mixing Proportions Between Data Streams
+#'
+#' This function generates a plot to compare the mixing proportions between two data streams 
+#' (e.g., chemical tracers and eDNA) for synthetic datasets with agreement and disagreement.
+#'
+#' @inheritParams mixmustr_wrangle_input
+#' @param synth_list_d A list representing the synthetic dataset with divergent mixing proportions.
+#' @param synth_list_c A list representing the synthetic dataset with convergent mixing proportions.
+#'
+#' @return A \code{\link[ggplot2]{ggplot}} object visualizing the comparison of mixing proportions between the two data streams.
+#'
+#' @details
+#' The function compares the mixing proportions from two data streams (`stream_1_props` and `df_stream_2`) 
+#' for both divergent and convergent synthetic datasets. It reshapes and aligns the data based on the 
+#' reference order provided in `mu_tab`, and then creates a scatter plot with points representing 
+#' the proportions from each data stream. The plot includes facets for each source and highlights 
+#' agreement or disagreement between the datasets.
+#'
 #' @importFrom dplyr left_join mutate n
 #' @importFrom tidyr pivot_longer
 #' @importFrom ggplot2 ggplot geom_point aes geom_abline scale_fill_manual
 #' @importFrom ggplot2 scale_shape_manual labs xlim ylim facet_wrap theme_bw
 #' @importFrom ggplot2 theme element_text guides guide_legend
 #' @importFrom rlang .data
+#'
+#' @examples
+#' # Assuming `synthetic_df_divergent`, `synthetic_df_convergent`, and
+#' # `tracer_parameters$mus` are loaded
+#' compare_mixing_proportions(
+#'   synth_list_d = synthetic_df_divergent,
+#'   synth_list_c = synthetic_df_convergent,
+#'   mu_tab = tracer_parameters$mus
+#' )
+#'
+#' @seealso
+#' \code{\link{synthetic_df_divergent}}, \code{\link{synthetic_df_convergent}}
+#'
 #' @export
-compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
+compare_mixing_proportions <- function(synth_list_d, synth_list_c, mu_tab) {
   rbind(
     left_join(
       reshape_ref_data(
-        synth_df_d, target = "stream_1_props", order_ref = mu_tab$Group
+        synth_list_d, target = "stream_1_props", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
         pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
-        synth_df_d, target = "df_stream_2", order_ref = mu_tab$Group
+        synth_list_d, target = "df_stream_2", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
@@ -226,13 +257,13 @@ compare_mixing_proportions <- function(synth_df_d, synth_df_c, mu_tab) {
       mutate(`dataset` = "Disagreement (Dataset 2)"),
     left_join(
       reshape_ref_data(
-        synth_df_c, target = "stream_1_props", order_ref = mu_tab$Group
+        synth_list_c, target = "stream_1_props", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
         pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
-        synth_df_c, target = "df_stream_2", order_ref = mu_tab$Group
+        synth_list_c, target = "df_stream_2", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>

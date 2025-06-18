@@ -3,9 +3,8 @@ library(mixmustr)
 synthetic_data <- data.frame(
   group = paste0("G", c(rep(1, 11), rep(2, 4), rep(3, 18), rep(4, 4), rep(5, 8), rep(6, 8), rep(7, 26)))
 )
-tracer_pars <- mixmustr:::wrangle_tracer_pars(bcs_si, bcs_fa)
-mus <- tracer_pars$mus
-sources <- mus$Group
+mus <- tracer_parameters$mus
+sources <- mus$source
 tracers <- mixmustr:::produce_mix_props(
   synthetic_data, sources, seed_1 = 1, seed_2 = 1, delta = -0.05
 )
