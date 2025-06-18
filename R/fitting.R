@@ -523,6 +523,7 @@ run_mixmustr_models <- function(model_choices, data_streams_list, mu_tab,
       model <- run_mixmod(model_path, mod_name_suffix_i, data = sdata, ...)
     })
     models[[i]] <- list(timing = timing, model = model)
+    names(models)[i] <- mod_name_suffix_i
   }
   models
 }
@@ -543,8 +544,5 @@ run_mixmustr_models <- function(model_choices, data_streams_list, mu_tab,
 #' 
 #' @export
 run_mixmod <- function(model_path, mod_name_suffix, ...) {
-  model_name <- basename(model_path) |>
-    file_path_sans_ext() |>
-    paste0("_", mod_name_suffix)
-  stan(file = model_path, model_name = model_name, ...)
+  stan(file = model_path, model_name = mod_name_suffix, ...)
 }
