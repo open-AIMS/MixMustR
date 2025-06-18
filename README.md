@@ -28,11 +28,19 @@ acids), and another yielding source composition (e.g., based on eDNA).
 source component to partially relax the assumption that the mixing
 proportions from all samples sources should sum up to 1. `mixmustr`
 should have wide applicability in ecological studies, particularly given
-the growing usage and availability of eDNA and metabarcoding methods to
-understand carbon source-sink dynamics ([Queirós et
-al. 2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366))
-as well as trophic interactions ([Hoenig et
-al. 2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
+the growing usage and availability of multiple tracers spanning
+traditional stable isotopes and eDNA to understand carbon source-sink
+dynamics ([Reef *et al.*
+2018](https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lno.10499),
+[Ortega *et al.*
+2020](https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lno.11579),
+[Queirós *et al.*
+2019](https://esajournals.onlinelibrary.wiley.com/doi/10.1002/ecm.1366)),
+and a mixture of stables isotope, fatty acids and eDNA to unravel
+trophic interactions (e.g., [Nielsen *et al.*
+2017](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.12869),
+[Hoenig *et al.*
+2022](https://onlinelibrary.wiley.com/doi/abs/10.1111/mec.16688)).
 
 <p align="center">
 <img src="man/figures/diagram.png" width = 800/>
@@ -135,10 +143,10 @@ expected structure of input variables.
     )
     # then visualise a particular output
     make_post_prop_long(model_fits[[1]]$model, mus, synthetic_df_convergent,
-                        target = "df_stream_1", n = 1)|>
+                        target = "df_stream_2", n = 1)|>
       plot_multiple_faceted_scatter_avg() +
       theme(legend.position = "none") +
-      labs(y = "Observed (simulated) from chemical tracers (data stream 1)",
+      labs(y = "Observed (simulated) from eDNA (data stream 2)",
            title = "Model fit performance mixing proportions",
            subtitle = "Synthetic dataset of high agreement")
 
