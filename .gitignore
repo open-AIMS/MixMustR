@@ -28,3 +28,4 @@ mixmustr*tar.gz
 paper/
 !vignettes/vignette-fig-*.pdf
 /doc/
+docs

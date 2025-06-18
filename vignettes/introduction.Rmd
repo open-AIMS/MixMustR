@@ -1,0 +1,166 @@
+---
+title: "Introduction to mixmustr"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to mixmustr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Overview
+
+`mixmustr` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/). It estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest:
+
+1. **Chemical tracers/biomarkers** (e.g., stable isotopes, fatty acids).
+2. **Source composition** (e.g., based on eDNA or metabarcoding).
+
+`mixmustr` also allows for the estimation of an additional, unsampled source component to partially relax the assumption that the mixing proportions from all sampled sources should sum to 1. This makes it particularly useful in ecological studies, such as understanding carbon source-sink dynamics or trophic interactions.
+
+<p align="center">
+  <img src="../man/figures/diagram.png" width = 800/>
+</p>
+
+**Figure 1:** `mixmustr` input data and framework.
+
+This vignette will walk you through the basic usage of `mixmustr`, covering:
+
+* Preparing input data
+* Running multiple model configurations
+* Visualizing model fit
+
+## Model Variants
+
+`mixmustr` provides eight model variants based on three user-driven binary choices:
+
+1. **Tracer signature error structure**:
+   - Residual-only error (similar to MixSIAR).
+   - Process error (incorporates uncertainty in tracer signatures).
+
+2. **Unsampled-source tracer signatures**:
+   - Fixed at the mean across sampled sources.
+   - Estimated using a prior informed by sampled tracer signatures.
+
+3. **Observation independence**:
+   - Independent observations.
+   - Hierarchical grouping structure.
+
+## Synthetic Datasets in `mixmustr`
+
+The `mixmustr` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical, unbalanced ecological field sampling design.
+
+- **`synthetic_df_convergent`**: Exhibits minimal differences in the underlying mixing proportions between data streams 1 and 2.
+- **`synthetic_df_divergent`**: Exhibits significant differences in the underlying mixing proportions between data streams 1 and 2.
+
+Each dataset is a list containing three data frames:
+1. **`df_stream_1`**: Simulated mixture data for the first stream, including tracer estimates.
+2. **`df_stream_2`**: Synthetic proportions for the second stream, with a column for each source.
+3. **`stream_1_props`**: Synthetic proportions for the first stream, used for testing purposes.
+
+These datasets were generated using the internal `make_mixture_data` function, which combines stable isotope data (`bcs_si`), fatty acid data (`bcs_fa`), and synthetic proportions. The `truth_stream` parameter specifies the stream used as the "true" source contributions. These datasets are valuable for evaluating the ability of model variants to retrieve underlying mixture proportions, with diagnostic tools available for summary and visualization.
+
+## Setup
+
+We begin by loading the package and setting options for parallel computing and Stan:
+
+```{r message = FALSE, warning = FALSE, results = "hide"}
+library(mixmustr)
+```
+
+---
+
+## Step 1: Prepare Tracer Parameters
+
+We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source.
+
+```{r}
+mus <- tracer_parameters$mus
+sigmas <- tracer_parameters$sigmas
+```
+
+These are required to inform the model about each source's chemical signature and the variability around it.
+
+---
+
+## Step 2: Run the Models
+
+The core function to run models is `run_mixmustr_models()`. This function allows you to run multiple models defined in the built-in `mixmustr_models` data frame.
+
+```{r, results = 'hide', message = FALSE}
+model_fits <- run_mixmustr_models(
+  mixmustr_models[6, ], synthetic_df_convergent, mus, sigmas,
+  sigma_ln_rho = 0.1, iter = 5e3, warmup = 2.5e3, chains = 3, cores = 1
+)
+```
+
+### Behind the Scenes
+
+This function:
+
+* Uses the tracer means (`mus`) and standard deviations (`sigmas`)
+* Reads your observed data (`synthetic_df_convergent`)
+* Applies each model configuration in `mixmustr_models`
+* Internally calls `mixmustr_wrangle_input()` to prepare each dataset for Stan
+* Returns a list of results, one per model configuration
+
+---
+
+## Step 3: Visualize Model Fit
+
+Once a model is fit, you can visualize the performance using the built-in plotting tools.
+
+```{r fig.width = 7, fig.height = 7}
+library(ggplot2)
+make_post_prop_long(
+  model_fits[[1]]$model, mus, synthetic_df_convergent, target = "df_stream_2",
+  n = 1
+) |>
+  plot_multiple_faceted_scatter_avg() +
+  theme(legend.position = "none") +
+  labs(
+    y = "Observed (simulated) from eDNA (data stream 2)",
+    title = "Model fit performance mixing proportions",
+    subtitle = "Synthetic dataset of high agreement"
+  )
+```
+
+This plot compares observed vs. predicted mixing proportions for data stream 2, helping you assess how well the model captures the underlying signal.
+
+---
+
+## Recap: Using mixmustr
+
+Here's a quick summary of how to use `mixmustr` effectively:
+
+1. **Prepare Input Data**:
+
+   * `df_stream_1`: Observed data (optionally with group labels)
+   * `df_stream_2`: Known mixing proportions (e.g., from eDNA)
+
+2. **Define Tracer Summaries**:
+
+   * `mus`: Mean tracer values per source
+   * `sigmas`: Standard deviation per tracer per source
+
+3. **Run Model Configurations**:
+
+   * Use `run_mixmustr_models()` with the default or custom configurations
+   * Adjust Stan settings (iterations, chains, etc.) as needed
+
+4. **Visualize Results**:
+
+   * Use `make_post_prop_long()` and plotting functions to assess fit
+
+---
+
+## Optional: Custom Input Creation
+
+If you want more control, you can use `mixmustr_wrangle_input()` directly to prepare the Stan input list. This is helpful if you're modifying the Stan code or working outside the wrapper functions.
+
+---
+
+## References
+
+* Stock, B. C., Semmens, B. X. (2016). MixSIAR GUI User Manual. [https://github.com/brianstock/MixSIAR](https://github.com/brianstock/MixSIAR)
+

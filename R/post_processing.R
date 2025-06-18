@@ -41,7 +41,7 @@
 #'   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 #' )
 #' make_post_prop_long(model_fits[[1]]$model, mus, synthetic_df_convergent,
-#'                     target = "df_stream_1", n = 1)
+#'                     target = "df_stream_2", n = 1)
 #' }
 #'
 #' @export

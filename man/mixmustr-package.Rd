@@ -17,9 +17,10 @@ composition (e.g., based on eDNA). \code{mixmustr} also allows for the estimatio
 of an additional, unsampled source component to partially relax the
 assumption that the mixing proportions from all samples sources should sum
 up to 1. \code{mixmustr} should have wide applicability in ecological studies,
-particularly given the growing usage and availability of eDNA and
-metabarcoding methods to understand carbon source-sink dynamics as well as
-trophic interactions.
+particularly given the growing usage and availability of multiple tracers
+spanning traditional stable isotopes and eDNA to understand carbon
+source-sink dynamics, and a mixture of stables isotope, fatty acids and eDNA
+to unravel trophic interactions.
 }
 \seealso{
 Useful links:
