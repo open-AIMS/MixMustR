@@ -27,3 +27,4 @@ mixmustr*tar.gz
 /Meta/
 paper/
 !vignettes/vignette-fig-*.pdf
+/doc/
