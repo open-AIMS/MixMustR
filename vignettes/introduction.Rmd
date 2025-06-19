@@ -1,7 +1,7 @@
 ---
 title: "Introduction to mixmustr"
 author: "Diego Barneche and Chris Fulton"
-date: "2025-06-18"
+date: "2025-06-19"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to mixmustr}
@@ -131,10 +131,10 @@ make_post_prop_long(
   )
 ```
 
-<div class="figure" style="text-align: center">
-<embed src="vignette-fig-unnamed-chunk-4-1.pdf" title="plot of chunk unnamed-chunk-4" width="90%" type="application/pdf" />
-<p class="caption">plot of chunk unnamed-chunk-4</p>
-</div>
+<p align="center">
+  <img src="vignette-fig-unnamed-chunk-4-1.pdf" width = 800/>
+</p>
+
 
 This plot compares observed vs. predicted mixing proportions for data stream 2, helping you assess how well the model captures the underlying signal.
 
