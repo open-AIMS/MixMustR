@@ -9,6 +9,7 @@ README.Rmd
 ^ignore$
 ^data-raw$
 ^stan$
+^figure$
 ^pkgdown$
 ^\.github$
 ^.*Rcheck$
