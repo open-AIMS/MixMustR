@@ -132,7 +132,7 @@ make_post_prop_long(
 ```
 
 <p align="center">
-  <img src="vignette-fig-unnamed-chunk-4-1.pdf" width = 800/>
+  <img src="vignette-fig-unnamed-chunk-4-1.png" width = "90%"/>
 </p>
 
 

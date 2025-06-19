@@ -23,20 +23,20 @@ purrr::walk(orig_files, ~knitr::knit(.x, tools::file_path_sans_ext(.x)))
 new_files <- tools::file_path_sans_ext(orig_files)
 for (i in seq_along(new_files)) {
   tmp <- readLines(new_files[i])
-  to_fix <- which(grepl("<embed src=", tmp, fixed = TRUE))
+  to_fix <- which(grepl("style=\"display:", tmp, fixed = TRUE))
   for (j in seq_along(to_fix)) {
     target <- (strsplit(tmp[to_fix[j]], "\"")[[1]]) |>
-      grep("\\.pdf$", x = _, value = TRUE)
+      grep("\\.png$", x = _, value = TRUE)
     new_tags <- paste0(
-      "<p align=\"center\">\n", "  <img src=\"", target, "\" width = 800/>\n",
-      "</p>\n"
+      "<p align=\"center\">\n", "  <img src=\"", target,
+      "\" width = \"90%\"/>\n", "</p>\n"
     )
     tmp[to_fix[j]] <- new_tags
   }
   writeLines(tmp, new_files[i])
 }
-# Move .pdf files into correct directory so they render -------------------
-images <- dir(".", pattern = "vignette-fig.*\\.pdf$")
+# Move .png files into correct directory so they render -------------------
+images <- dir(".", pattern = "vignette-fig.*\\.png$")
 success <- file.copy(from = images, to = file.path("vignettes", images),
                      overwrite = TRUE)
 # Clean up if successful --------------------------------------------------
