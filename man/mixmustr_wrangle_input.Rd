@@ -76,7 +76,8 @@ first column should be named \code{group}, matching the \code{group} column in
 contain proportions (i.e., row sums up to 1, and no negative values).
 }
 \item \code{mu_tab}: A data frame containing the mean tracer signatures for each
-source. The first column should be named \code{source}, and the remaining columns
+source. The first column should be named \code{source}, with source names
+matching those from data_streams_list$df_stream_2. The remaining columns
 should contain numeric tracer values, with names matching those in
 data_streams_list$df_stream_1.
 \item \code{sig_tab}: A data frame containing the standard deviations of tracer

@@ -324,7 +324,8 @@ check_sig_tab <- function(sigmas, mus) {
 #' contain proportions (i.e., row sums up to 1, and no negative values).
 #'
 #' - `mu_tab`: A data frame containing the mean tracer signatures for each
-#' source. The first column should be named `source`, and the remaining columns
+#' source. The first column should be named `source`, with source names
+#' matching those from data_streams_list$df_stream_2. The remaining columns
 #' should contain numeric tracer values, with names matching those in
 #' data_streams_list$df_stream_1.
 #'
@@ -414,8 +415,6 @@ mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
                                    fix_unsampled, hierarchical, ...) {
   yobs <- data_streams_list$df_stream_1 |>
     select(select(mu_tab, -.data$source) |> names())
-  reff_df <- data_streams_list$df_stream_1 |>
-    mutate(YR = as.numeric(as.factor(.data$group)))
   out <- list(
     N = nrow(yobs),
     J = nrow(mu_tab), # sources
@@ -447,6 +446,13 @@ mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
     out[["s"]] <- select(sig_tab, -.data$source)
   }
   if (hierarchical) {
+    if (!"group" %in% names(data_streams_list$df_stream_1)) {
+      stop("You requested a hierarchical model. Your input data streams must",
+           " contain a column named \"group\" indicating the grouping-level",
+           " variable.")
+    }
+    reff_df <- data_streams_list$df_stream_1 |>
+      mutate(YR = as.numeric(as.factor(.data$group)))
     out[["R"]] <- max(reff_df$YR)
     out[["YR"]] <- reff_df$YR
   }
