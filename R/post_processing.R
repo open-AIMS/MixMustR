@@ -5,6 +5,9 @@
 #' @inheritParams mixmustr_wrangle_input
 #' @param modfit A fitted Stan model object containing posterior draws.
 #' Typically produced by function \code{\link{run_mixmustr_models}}.
+#' @param mu_tab A data frame containing the mean tracer
+#' signatures for each source. The first column should be named `source`, and
+#' the remaining columns should contain numeric tracer values.
 #' @param n A numeric or character value representing the variant identifier for
 #' the model.
 #' @param ... Additional arguments passed to internal function.
@@ -34,14 +37,13 @@
 #' @examples
 #' \dontrun{
 #' library(mixmustr)
-#' mus <- tracer_parameters$mus
-#' sigmas <- tracer_parameters$sigmas
+#' # mixmustr_models[6, ] runs quickest
 #' model_fits <- run_mixmustr_models(
-#'   mixmustr_models[1, ], synthetic_df_convergent, mus, sigmas,
+#'   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
 #'   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 #' )
-#' make_post_prop_long(model_fits[[1]]$model, mus, synthetic_df_convergent,
-#'                     target = "df_stream_2", n = 1)
+#' make_post_prop_long(model_fits[[1]]$model, tracer_parameters$mus,
+#'                     synthetic_df_convergent, target = "df_stream_2", n = 1)
 #' }
 #'
 #' @export

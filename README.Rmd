@@ -89,15 +89,15 @@ See package documentation and online vignettes for full explanation of expected 
 library(mixmustr)
 options(mc.cores = parallel::detectCores())
 rstan::rstan_options(auto_write = TRUE)
-mus <- tracer_parameters$mus
-sigmas <- tracer_parameters$sigmas
+# As an example, we pick mixmustr_models[6, ] because it runs quickest. It is
+# non-hierarchical and does not estimate (un)sampled tracer signatures.
 model_fits <- run_mixmustr_models(
-  mixmustr_models, synthetic_df_convergent, mus, sigmas, sigma_ln_rho = 0.1,
-  iter = 1e4, warmup = 5e3, chains = 4, cores = 4
+  mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
+  sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 )
 # then visualise a particular output
-make_post_prop_long(model_fits[[1]]$model, mus, synthetic_df_convergent,
-                    target = "df_stream_2", n = 1)|>
+make_post_prop_long(model_fits[[1]]$model, tracer_parameters$mus,
+                    synthetic_df_convergent, target = "df_stream_2", n = 1) |>
   plot_multiple_faceted_scatter_avg() +
   theme(legend.position = "none") +
   labs(y = "Observed (simulated) from eDNA (data stream 2)",

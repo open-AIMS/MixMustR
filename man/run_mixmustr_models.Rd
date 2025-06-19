@@ -7,8 +7,7 @@
 run_mixmustr_models(
   model_choices,
   data_streams_list,
-  mu_tab,
-  sig_tab = NULL,
+  tracer_list,
   sigma_ln_rho,
   ...
 )
@@ -23,14 +22,12 @@ data streams for the model. It should include two
 data frames named \code{df_stream_1} and\code{df_stream_2}. See
 details for the expected structure of these.}
 
-\item{mu_tab}{A data frame containing the mean tracer
-signatures for each source. The first column should be named \code{source}, and
-the remaining columns should contain numeric tracer values.}
-
-\item{sig_tab}{(Optional) A data frame containing the
-standard deviations of tracer signatures for each source. The structure must
-match \code{mu_tab}. Required if \code{sample_tracer} is \code{TRUE} or if \code{fix_unsampled}
-is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.}
+\item{tracer_list}{A named list containing 1--3 data frames of same size,
+one for the mean signatures, one for their standard deviations, and another
+one for sample size. The second data frame is mandatory if \code{sample_tracer}
+is \code{TRUE}, or if \code{fix_unsampled} is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.
+The third data frame is mandatory if \code{sample_tracer} is \code{TRUE}. See details
+for exact structure of these data frames.}
 
 \item{sigma_ln_rho}{A numeric value or matrix specifying the confidence
 around the log mixing proportions. If a matrix, it must be of dimensions
@@ -59,10 +56,9 @@ containing all of the potential allowed models \code{\link{mixmustr_models}}.
 \examples{
 \dontrun{
 library(mixmustr)
-mus <- tracer_parameters$mus
-sigmas <- tracer_parameters$sigmas
+# mixmustr_models[6, ] runs quickest
 model_fits <- run_mixmustr_models(
-  mixmustr_models[1, ], synthetic_df_convergent, mus, sigmas,
+  mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 )
 }

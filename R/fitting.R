@@ -76,7 +76,7 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
   if (sample_tracer) {
     script <- c(script,
       "\tmatrix<lower=0>[J, K] s; // sample SDs for each source and tracer\n",
-      "\tint<lower=1> m[J]; // source-specific sample size\n"
+      "\tmatrix<lower=1>[J, K] m; // source- and tracer- specific sample size\n"
     )
   }
   if (!fix_unsampled & !sample_tracer) {
@@ -137,7 +137,7 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
     script <- c(script,
       "\tfor (j in 1:J) {\n",
       "\t\tfor (k in 1:K) {\n",
-      "\t\t\tomega[j, k] = sqrt((s[j, k]^2 * (m[j] - 1)) / nu[j, k]);\n",
+      "\t\t\tomega[j, k] = sqrt((s[j, k]^2 * (m[j, k] - 1)) / nu[j, k]);\n",
       "\t\t}\n", "\t}\n"
     )
   }
@@ -147,8 +147,8 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
       "\t// Sampling sources\n",
       "\tfor (j in 1:J) {\n",
       "\t\tfor (k in 1:K) {\n",
-      "\t\t\ttarget += chi_square_lpdf(m[j] | nu[j, k]);\n",
-      "\t\t\ttarget += normal_lpdf(x[j, k] | mu[j, k], s[j, k] / sqrt(m[j]));\n",
+      "\t\t\ttarget += chi_square_lpdf(m[j, k] | nu[j, k]);\n",
+      "\t\t\ttarget += normal_lpdf(x[j, k] | mu[j, k], s[j, k] / sqrt(m[j, k]));\n",
       "\t\t}\n",
       "\t}\n"
     )
@@ -257,26 +257,28 @@ check_sigma_ln_rho <- function(x, ref) {
 }
 
 #' @noRd
-check_sig_tab <- function(sigmas, mus) {
-  if (!is.data.frame(sigmas) | !is.data.frame(mus)) {
-    stop("You need valid data.frames of tracers signature mean and SDs.",
-         " See `tracer_parameters` for examples of each.")
+check_sd_tabs <- function(to_eval, mus, param = "SDs") {
+  fct_eval <- if (param == "SDs") is.numeric else if (param == "ns") is.integer
+  if (!is.data.frame(to_eval) | !is.data.frame(mus)) {
+    stop("You need valid data.frames of tracers signature mean and ", param,
+         ". See `tracer_parameters` for examples of each.")
   }
-  if (!all(dim(sigmas) == dim(mus)) |
-        !all(names(sigmas) == names(mus)) |
-        !all(rownames(sigmas) == rownames(mus))
+  if (!all(dim(to_eval) == dim(mus)) |
+        !all(names(to_eval) == names(mus)) |
+        !all(rownames(to_eval) == rownames(mus))
       ) {
-    stop("Data frames of tracers signature mean and SDs do not match in",
-         " structure.")
+    stop("Data frames of tracers signature mean and ", param, " do not match",
+         " in structure.")
   }
-  if (names(sigmas)[1] != "source") {
-    stop("First column name in tracers signature mean and SDs should be",
-         " `source`.")
+  if (names(to_eval)[1] != "source") {
+    stop("First column name in tracers signature mean and ", param, " should",
+         " be `source`.")
   }
-  if (!all(apply(sigmas[, -1], 2, is.numeric)) |
-        !all(apply(sigmas[, -1], 2, function(x)sum(is.na(x)) == 0))) {
-    stop("Tracers signature columns should all be numeric and cannot contain",
-         " NAs.")
+  if (!all(apply(to_eval[, -1], 2, fct_eval)) |
+        !all(apply(to_eval[, -1], 2, function(x)sum(is.na(x)) == 0))) {
+    type <- if (param == "SDs") "numeric" else if (param == "ns") "integer"
+    stop("Tracers signature columns should all be ", type, " and cannot",
+         " contain NAs.")
   }
 }
 
@@ -289,21 +291,18 @@ check_sig_tab <- function(sigmas, mus) {
 #' data streams for the model. It should include two
 #' data frames named `df_stream_1` and`df_stream_2`. See
 #' details for the expected structure of these.
-#' @param mu_tab A data frame containing the mean tracer
-#' signatures for each source. The first column should be named `source`, and
-#' the remaining columns should contain numeric tracer values.
-#' @param sig_tab (Optional) A data frame containing the
-#' standard deviations of tracer signatures for each source. The structure must
-#' match `mu_tab`. Required if `sample_tracer` is `TRUE` or if `fix_unsampled`
-#' is `FALSE` and `sample_tracer` is `FALSE`.
+#' @param tracer_list A named list containing 1--3 data frames of same size,
+#' one for the mean signatures, one for their standard deviations, and another
+#' one for sample size. The second data frame is mandatory if `sample_tracer`
+#' is `TRUE`, or if `fix_unsampled` is `FALSE` and `sample_tracer` is `FALSE`.
+#' The third data frame is mandatory if `sample_tracer` is `TRUE`. See details
+#' for exact structure of these data frames.
 #' @param model_path A character string specifying the path to the Stan model
 #' file.
 #' @param sigma_ln_rho A numeric value or matrix specifying the confidence
 #' around the log mixing proportions. If a matrix, it must be of dimensions
 #' N X J, with N being the number of observations and J being the number of
 #' sources.
-#' @param m A numeric value specifying the sample size for each source. Used
-#' when `sample_tracer` is `TRUE`.
 #' @param ... Additional unused arguments.
 #'
 #' @importFrom dplyr select mutate
@@ -323,15 +322,20 @@ check_sig_tab <- function(sigmas, mus) {
 #' `df_stream_1`. The remaining columns (`source1`, `source2`, etc.) must
 #' contain proportions (i.e., row sums up to 1, and no negative values).
 #'
-#' - `mu_tab`: A data frame containing the mean tracer signatures for each
+#' - `tracer_list`: A list containing up to three data frames:
+#' - `mus`: A data frame containing the mean tracer signatures for each
 #' source. The first column should be named `source`, with source names
 #' matching those from data_streams_list$df_stream_2. The remaining columns
 #' should contain numeric tracer values, with names matching those in
-#' data_streams_list$df_stream_1.
+#' data_streams_list$df_stream_1. This data frame is required across all models
+#' in mixmustr.
 #'
-#' - `sig_tab`: A data frame containing the standard deviations of tracer
-#' signatures for each source. The structure must match that of `mu_tab`. It
+#' - `sigmas`: A data frame containing the standard deviations of tracer
+#' signatures for each source. The structure must match that of `mus`. It
 #' cannot contain NAs.
+#' 
+#' - `ns`: A data frame containing the sample size used to calculate mus and
+#' sigmas The structure must match that of `mus`. It cannot contain NAs.
 #'
 #' - `model_path`: A character string specifying the path to the Stan model
 #' file.
@@ -341,9 +345,6 @@ check_sig_tab <- function(sigmas, mus) {
 #' 1)`, with N being the number of observations and J being the number of
 #' sources. The additional J + 1 column represents the unsampled source, making
 #' the final row sums across the J + 1 columns total 1.
-#'
-#' - `m`: A numeric value specifying the sample size for each source. Used when
-#' `sample_tracer` is `TRUE`.
 #'
 #' - `sample_tracer`: Logical. If `TRUE`, the model estimates uncertainty
 #' around sampled source signatures.
@@ -360,10 +361,9 @@ check_sig_tab <- function(sigmas, mus) {
 #' 
 #' @examples
 #' library(mixmustr)
-#' data(mixmustr_models)
 #' 
 #' # Example input data
-#' synthetic_list <- list(
+#' synthetic_streams_list <- list(
 #'   df_stream_1 = data.frame(
 #'     group = c("A", "A", "B", "B"),
 #'     tracer1 = c(1.2, 1.3, 2.1, 2.2),
@@ -376,43 +376,49 @@ check_sig_tab <- function(sigmas, mus) {
 #'   )
 #' )
 #' 
-#' mu_tab <- data.frame(
-#'   source = c("source1", "source2"),
-#'   tracer1 = c(1.25, 2.15),
-#'   tracer2 = c(3.45, 4.65)
-#' )
-#' 
-#' sig_tab <- data.frame(
-#'   source = c("source1", "source2"),
-#'   tracer1 = c(0.05, 0.1),
-#'   tracer2 = c(0.15, 0.2)
+#' synthetic_tracer_list <- list(
+#'   mus = data.frame(
+#'     source = c("source1", "source2"),
+#'     tracer1 = c(1.25, 2.15),
+#'     tracer2 = c(3.45, 4.65)
+#'   ),
+#'   sigmas = data.frame(
+#'     source = c("source1", "source2"),
+#'     tracer1 = c(0.05, 0.1),
+#'     tracer2 = c(0.15, 0.2)
+#'   ),
+#'   ns = data.frame(
+#'     source = c("source1", "source2"),
+#'     tracer1 = c(5L, 10L), # make sure these are integers
+#'     tracer2 = c(7L, 9L)
+#'   )
 #' )
 #' 
 #' # Example parameters
 #' model_path <- tempfile(fileext = ".stan")
 #' sigma_ln_rho <- 0.01
-#' m <- 10
 #' sample_tracer <- TRUE
 #' fix_unsampled <- FALSE
 #' hierarchical <- TRUE
 #' 
 #' # Call the function
 #' input_list <- mixmustr_wrangle_input(
-#'   data_streams_list = synthetic_list,
-#'   mu_tab = mu_tab,
-#'   sig_tab = sig_tab,
+#'   data_streams_list = synthetic_streams_list,
+#'   tracer_list = synthetic_tracer_list,
 #'   model_path = model_path,
 #'   sigma_ln_rho = sigma_ln_rho,
-#'   m = m,
 #'   sample_tracer = sample_tracer,
 #'   fix_unsampled = fix_unsampled,
 #'   hierarchical = hierarchical
 #' )
 #' 
 #' @export
-mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
-                                   model_path, sigma_ln_rho, m, sample_tracer,
+mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
+                                   model_path, sigma_ln_rho, sample_tracer,
                                    fix_unsampled, hierarchical, ...) {
+  mu_tab <- tracer_list$mus
+  sig_tab <- tracer_list$sigmas
+  n_tab <- tracer_list$ns
   yobs <- data_streams_list$df_stream_1 |>
     select(select(mu_tab, -.data$source) |> names())
   out <- list(
@@ -436,13 +442,15 @@ mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
     out[["sigma_ln_rho"]] <- sigma_ln_rho
   }
   sig_tab_er <- "You need a valid data.frame of tracers signature SDs."
+  ns_er <- "You need a valid data.frame of tracers signature sample sizes."
   if (sample_tracer) {
-    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sd_tabs(sig_tab, mu_tab)
     out[["s"]] <- select(sig_tab, -.data$source)
-    out[["m"]] <- rep(m, nrow(mu_tab))
+    if (is.null(n_tab)) stop(ns_er) else check_sd_tabs(n_tab, mu_tab, "ns")
+    out[["m"]] <- select(n_tab, -.data$source)
   }
   if (!fix_unsampled & !sample_tracer) {
-    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sd_tabs(sig_tab, mu_tab)
     out[["s"]] <- select(sig_tab, -.data$source)
   }
   if (hierarchical) {
@@ -491,24 +499,25 @@ mixmustr_wrangle_input <- function(data_streams_list, mu_tab, sig_tab = NULL,
 #' @examples
 #' \dontrun{
 #' library(mixmustr)
-#' mus <- tracer_parameters$mus
-#' sigmas <- tracer_parameters$sigmas
+#' # mixmustr_models[6, ] runs quickest
 #' model_fits <- run_mixmustr_models(
-#'   mixmustr_models[1, ], synthetic_df_convergent, mus, sigmas,
+#'   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
 #'   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 #' )
 #' }
 #' 
 #' @export
-run_mixmustr_models <- function(model_choices, data_streams_list, mu_tab,
-                                sig_tab = NULL, sigma_ln_rho, ...) {
-
+run_mixmustr_models <- function(model_choices, data_streams_list, tracer_list,
+                                sigma_ln_rho, ...) {
+  mu_tab <- tracer_list$mus
+  sig_tab <- tracer_list$sigmas
+  n_tab <- tracer_list$ns
   sig_tab_required <- any(model_choices$sample_tracer | 
     (!model_choices$fix_unsampled & !model_choices$sample_tracer)
   )
   if (sig_tab_required) {
     sig_tab_er <- "You need a valid data.frame of tracers signature SDs."
-    if (is.null(sig_tab)) stop(sig_tab_er) else check_sig_tab(sig_tab, mu_tab)
+    if (is.null(sig_tab)) stop(sig_tab_er) else check_sd_tabs(sig_tab, mu_tab)
   }
   models <- vector(mode = "list", length = nrow(model_choices))
   for (i in seq_len(nrow(model_choices))) {
@@ -518,8 +527,7 @@ run_mixmustr_models <- function(model_choices, data_streams_list, mu_tab,
                    model_choices$code_path[i])
     model_path <- model_choices$code_path[i]
     sdata <- mixmustr_wrangle_input(
-      data_streams_list, mu_tab, sig_tab, model_path,
-      sigma_ln_rho = sigma_ln_rho, m = 100,
+      data_streams_list, tracer_list, model_path, sigma_ln_rho = sigma_ln_rho,
       sample_tracer = model_choices$sample_tracer[i],
       fix_unsampled = model_choices$fix_unsampled[i],
       hierarchical = model_choices$hierarchical[i]

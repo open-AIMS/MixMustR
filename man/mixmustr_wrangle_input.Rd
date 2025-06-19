@@ -6,11 +6,9 @@
 \usage{
 mixmustr_wrangle_input(
   data_streams_list,
-  mu_tab,
-  sig_tab = NULL,
+  tracer_list,
   model_path,
   sigma_ln_rho,
-  m,
   sample_tracer,
   fix_unsampled,
   hierarchical,
@@ -23,14 +21,12 @@ data streams for the model. It should include two
 data frames named \code{df_stream_1} and\code{df_stream_2}. See
 details for the expected structure of these.}
 
-\item{mu_tab}{A data frame containing the mean tracer
-signatures for each source. The first column should be named \code{source}, and
-the remaining columns should contain numeric tracer values.}
-
-\item{sig_tab}{(Optional) A data frame containing the
-standard deviations of tracer signatures for each source. The structure must
-match \code{mu_tab}. Required if \code{sample_tracer} is \code{TRUE} or if \code{fix_unsampled}
-is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.}
+\item{tracer_list}{A named list containing 1--3 data frames of same size,
+one for the mean signatures, one for their standard deviations, and another
+one for sample size. The second data frame is mandatory if \code{sample_tracer}
+is \code{TRUE}, or if \code{fix_unsampled} is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.
+The third data frame is mandatory if \code{sample_tracer} is \code{TRUE}. See details
+for exact structure of these data frames.}
 
 \item{model_path}{A character string specifying the path to the Stan model
 file.}
@@ -39,9 +35,6 @@ file.}
 around the log mixing proportions. If a matrix, it must be of dimensions
 N X J, with N being the number of observations and J being the number of
 sources.}
-
-\item{m}{A numeric value specifying the sample size for each source. Used
-when \code{sample_tracer} is \code{TRUE}.}
 
 \item{sample_tracer}{A logical vector, defaults to FALSE.}
 
@@ -75,22 +68,24 @@ first column should be named \code{group}, matching the \code{group} column in
 \code{df_stream_1}. The remaining columns (\code{source1}, \code{source2}, etc.) must
 contain proportions (i.e., row sums up to 1, and no negative values).
 }
-\item \code{mu_tab}: A data frame containing the mean tracer signatures for each
+\item \code{tracer_list}: A list containing up to three data frames:
+\item \code{mus}: A data frame containing the mean tracer signatures for each
 source. The first column should be named \code{source}, with source names
 matching those from data_streams_list$df_stream_2. The remaining columns
 should contain numeric tracer values, with names matching those in
-data_streams_list$df_stream_1.
-\item \code{sig_tab}: A data frame containing the standard deviations of tracer
-signatures for each source. The structure must match that of \code{mu_tab}. It
+data_streams_list$df_stream_1. This data frame is required across all models
+in mixmustr.
+\item \code{sigmas}: A data frame containing the standard deviations of tracer
+signatures for each source. The structure must match that of \code{mus}. It
 cannot contain NAs.
+\item \code{ns}: A data frame containing the sample size used to calculate mus and
+sigmas The structure must match that of \code{mus}. It cannot contain NAs.
 \item \code{model_path}: A character string specifying the path to the Stan model
 file.
 \item \code{sigma_ln_rho}: A numeric value or matrix specifying the confidence around
 the log mixing proportions. If a matrix, it must have dimensions \verb{N x (J + 1)}, with N being the number of observations and J being the number of
 sources. The additional J + 1 column represents the unsampled source, making
 the final row sums across the J + 1 columns total 1.
-\item \code{m}: A numeric value specifying the sample size for each source. Used when
-\code{sample_tracer} is \code{TRUE}.
 \item \code{sample_tracer}: Logical. If \code{TRUE}, the model estimates uncertainty
 around sampled source signatures.
 \item \code{fix_unsampled}: Logical. If \code{TRUE}, the model fixes unsampled source signatures to the mean across all sampled sources.
@@ -99,10 +94,9 @@ around sampled source signatures.
 }
 \examples{
 library(mixmustr)
-data(mixmustr_models)
 
 # Example input data
-synthetic_list <- list(
+synthetic_streams_list <- list(
   df_stream_1 = data.frame(
     group = c("A", "A", "B", "B"),
     tracer1 = c(1.2, 1.3, 2.1, 2.2),
@@ -115,34 +109,37 @@ synthetic_list <- list(
   )
 )
 
-mu_tab <- data.frame(
-  source = c("source1", "source2"),
-  tracer1 = c(1.25, 2.15),
-  tracer2 = c(3.45, 4.65)
-)
-
-sig_tab <- data.frame(
-  source = c("source1", "source2"),
-  tracer1 = c(0.05, 0.1),
-  tracer2 = c(0.15, 0.2)
+synthetic_tracer_list <- list(
+  mus = data.frame(
+    source = c("source1", "source2"),
+    tracer1 = c(1.25, 2.15),
+    tracer2 = c(3.45, 4.65)
+  ),
+  sigmas = data.frame(
+    source = c("source1", "source2"),
+    tracer1 = c(0.05, 0.1),
+    tracer2 = c(0.15, 0.2)
+  ),
+  ns = data.frame(
+    source = c("source1", "source2"),
+    tracer1 = c(5L, 10L), # make sure these are integers
+    tracer2 = c(7L, 9L)
+  )
 )
 
 # Example parameters
 model_path <- tempfile(fileext = ".stan")
 sigma_ln_rho <- 0.01
-m <- 10
 sample_tracer <- TRUE
 fix_unsampled <- FALSE
 hierarchical <- TRUE
 
 # Call the function
 input_list <- mixmustr_wrangle_input(
-  data_streams_list = synthetic_list,
-  mu_tab = mu_tab,
-  sig_tab = sig_tab,
+  data_streams_list = synthetic_streams_list,
+  tracer_list = synthetic_tracer_list,
   model_path = model_path,
   sigma_ln_rho = sigma_ln_rho,
-  m = m,
   sample_tracer = sample_tracer,
   fix_unsampled = fix_unsampled,
   hierarchical = hierarchical

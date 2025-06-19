@@ -1,6 +1,11 @@
 #' Fatty Acid Composition of Various Sources
 #'
-#' This dataset contains the fatty acid composition of various sources, including macroalgae, mangroves, saltmarsh, seagrass, plankton, and terrestrial grass. The data includes mean values and standard deviations for different fatty acids, as well as the study from which the data was sourced.
+#' This dataset contains the fatty acid composition of various sources,
+#' including macroalgae, mangroves, saltmarsh, seagrass, plankton, and
+#' terrestrial grass. The data includes mean values, standard deviations and
+#' sample sizes for different fatty acids, as well as the study from which the
+#' data was sourced. Values of 0 standard deviation have been arbitrarily
+#' transformed to 0.01.
 #'
 #' @format A data frame with 6 rows and 15 variables:
 #' \describe{
@@ -8,16 +13,22 @@
 #'   \item{Taxa}{The taxa or species associated with the source.}
 #'   \item{24:0}{Mean value of the fatty acid 24:0.}
 #'   \item{24:0 (SD)}{Standard deviation of the fatty acid 24:0.}
+#'   \item{24:0 (n)}{Sample size of the fatty acid 24:0.}
 #'   \item{18:1w9}{Mean value of the fatty acid 18:1w9.}
 #'   \item{18:1w9 (SD)}{Standard deviation of the fatty acid 18:1w9.}
+#'   \item{18:1w9 (n)}{Sample size of the fatty acid 18:1w9.}
 #'   \item{18:2w6}{Mean value of the fatty acid 18:2w6.}
 #'   \item{18:2w6 (SD)}{Standard deviation of the fatty acid 18:2w6.}
+#'   \item{18:2w6 (n)}{Sample size of the fatty acid 18:2w6.}
 #'   \item{18:3w3}{Mean value of the fatty acid 18:3w3.}
 #'   \item{18:3w3 (SD)}{Standard deviation of the fatty acid 18:3w3.}
+#'   \item{18:3w3 (n)}{Sample size of the fatty acid 18:3w3.}
 #'   \item{20:4w6}{Mean value of the fatty acid 20:4w6.}
 #'   \item{20:4w6 (SD)}{Standard deviation of the fatty acid 20:4w6.}
+#'   \item{20:4w6 (n)}{Sample size of the fatty acid 20:4w6.}
 #'   \item{20:5w3}{Mean value of the fatty acid 20:5w3.}
 #'   \item{20:5w3 (SD)}{Standard deviation of the fatty acid 20:5w3.}
+#'   \item{20:5w3 (n)}{Sample size of the fatty acid 20:5w3.}
 #'   \item{Study}{The study from which the data was sourced.}
 #' }
 #' @source The data and methodology are described in the following references:

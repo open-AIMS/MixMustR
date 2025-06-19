@@ -8,10 +8,18 @@
 A data frame with 6 rows and 6 variables:
 \describe{
 \item{source}{The source of the sample (e.g., Mangrove, Seagrass, etc.).}
-\item{d(13C/12C)}{The stable isotope ratio of carbon (\eqn{\delta^{13}C}) in parts per thousand (‰).}
-\item{d13C sd}{The standard deviation of the \eqn{\delta^{13}C} measurements.}
-\item{d(15N/14N)}{The stable isotope ratio of nitrogen (\eqn{\delta^{15}N}) in parts per thousand (‰).}
-\item{d15N sd}{The standard deviation of the \eqn{\delta^{15}N} measurements.}
+\item{d(13C/12C)}{The stable isotope ratio of carbon (\eqn{\delta^{13}C})
+in parts per thousand (‰).}
+\item{d(13C/12C) (SD)}{The standard deviation of the \eqn{\delta^{13}C}
+measurements.}
+\item{d(13C/12C) (n)}{The sample size of the \eqn{\delta^{13}C}
+measurements.}
+\item{d(15N/14N)}{The stable isotope ratio of nitrogen
+(\eqn{\delta^{15}N}) in parts per thousand (‰).}
+\item{d(15N/14N) (SD)}{The standard deviation of the \eqn{\delta^{15}N}
+measurements.}
+\item{d(15N/14N) (n)}{The sample size of the \eqn{\delta^{15}N}
+measurements.}
 \item{Study}{The study or reference from which the data were obtained.}
 }
 }
@@ -27,7 +35,11 @@ The data and methodology are described in the following references:
 bcs_si
 }
 \description{
-This dataset contains stable isotope ratios (\eqn{\delta^{13}C} and \eqn{\delta^{15}N}) and their standard deviations for various sources in the BCS study.
+This dataset contains stable isotope ratios
+(\eqn{\delta^{13}C} and \eqn{\delta^{15}N}), their standard deviations and
+sample sizes for various sources in the BCS study. Notice that the sample
+sizes for Terrestrial grass were not provided in the original source
+(Goni & Thomas, 2000) and were therefore arbitrarily set to 15.
 }
 \examples{
 data(bcs_si)

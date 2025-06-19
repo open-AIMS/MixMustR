@@ -75,13 +75,7 @@ library(mixmustr)
 
 ## Step 1: Prepare Tracer Parameters
 
-We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source.
-
-
-``` r
-mus <- tracer_parameters$mus
-sigmas <- tracer_parameters$sigmas
-```
+We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source. These should be combined into a named list, and `mixmustr` provides an example list called `tracer_parameters`.
 
 These are required to inform the model about each source's chemical signature and the variability around it.
 
@@ -94,7 +88,7 @@ The core function to run models is `run_mixmustr_models()`. This function allows
 
 ``` r
 model_fits <- run_mixmustr_models(
-  mixmustr_models[6, ], synthetic_df_convergent, mus, sigmas,
+  mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
 )
 ```
@@ -118,6 +112,7 @@ Once a model is fit, you can visualize the performance using the built-in plotti
 
 ``` r
 library(ggplot2)
+mus <- tracer_parameters$mus
 make_post_prop_long(
   model_fits[[1]]$model, mus, synthetic_df_convergent, target = "df_stream_2",
   n = 1
@@ -132,7 +127,7 @@ make_post_prop_long(
 ```
 
 <p align="center">
-  <img src="vignette-fig-unnamed-chunk-4-1.png" width = "90%"/>
+  <img src="vignette-fig-unnamed-chunk-3-1.png" width = "90%"/>
 </p>
 
 

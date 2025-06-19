@@ -124,27 +124,32 @@ calc_tracer_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
 wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
   mu_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
+      select(!c(.data$Study, .data$sd, .data$n, .data$tracer_family)) |>
       pivot_wider(names_from = "tracer", values_from = "mean"),
     reshape_fattyacids_df(raw_data_fa) |>
-      select(!c(.data$Study, .data$sd, .data$tracer_family)) |>
+      select(!c(.data$Study, .data$sd, .data$n, .data$tracer_family)) |>
       pivot_wider(names_from = "tracer", values_from = "mean"),
     by = "source"
   )
   sig_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
+      select(!c(.data$Study, .data$mean, .data$n, .data$tracer_family)) |>
       pivot_wider(names_from = "tracer", values_from = "sd"),
     reshape_fattyacids_df(raw_data_fa) |>
-      select(!c(.data$Study, .data$mean, .data$tracer_family)) |>
+      select(!c(.data$Study, .data$mean, .data$n, .data$tracer_family)) |>
       pivot_wider(names_from = "tracer", values_from = "sd"),
     by = "source"
-  ) |>
-    mutate(across(where(is.numeric), function(x) {
-      x[x == 0] <- 0.01 # NB: check this. Model can't deal with 0 variance
-      x
-    }))
-  list(mus = mu_tab, sigmas = sig_tab)
+  )
+  n_tab <- left_join(
+    reshape_isotope_df(raw_data_si) |>
+      select(!c(.data$Study, .data$mean, .data$sd, .data$tracer_family)) |>
+      pivot_wider(names_from = "tracer", values_from = "n"),
+    reshape_fattyacids_df(raw_data_fa) |>
+      select(!c(.data$Study, .data$mean, .data$sd, .data$tracer_family)) |>
+      pivot_wider(names_from = "tracer", values_from = "n"),
+    by = "source"
+  )
+  list(mus = mu_tab, sigmas = sig_tab, ns = n_tab)
 }
 
 #' @importFrom dplyr select left_join mutate case_match
@@ -154,22 +159,26 @@ wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
 #' @noRd
 reshape_isotope_df <- function(x) {
   x |>
-    select(-ends_with("sd")) |>
+    select(-ends_with("(SD)"), -ends_with("(n)")) |>
     pivot_longer(
       cols = starts_with("d("), values_to = "mean", names_to = "tracer"
     ) |>
     left_join(
       x |>
-        select(-starts_with("d(")) |>
+        select(.data$source, ends_with("(SD)"), .data$Study) |>
         pivot_longer(
-          cols = ends_with("sd"), values_to = "sd", names_to = "tracer"
+          cols = ends_with("(SD)"), values_to = "sd", names_to = "tracer"
         ) |>
-        mutate(
-          tracer = case_match(.data$tracer,
-            "d13C sd" ~ "d(13C/12C)", "d15N sd" ~ "d(15N/14N)",
-            .default = NA
-          )
-        ),
+        mutate(tracer = gsub(" (SD)", "", .data$tracer, fixed = TRUE)),
+      by = c("source", "Study", "tracer")
+    ) |>
+    left_join(
+      x |>
+        select(.data$source, ends_with("(n)"), .data$Study) |>
+        pivot_longer(
+          cols = ends_with("(n)"), values_to = "n", names_to = "tracer"
+        ) |>
+        mutate(tracer = gsub(" (n)", "", .data$tracer, fixed = TRUE)),
       by = c("source", "Study", "tracer")
     ) |>
     mutate(tracer_family = "si")
@@ -182,18 +191,27 @@ reshape_isotope_df <- function(x) {
 #' @noRd
 reshape_fattyacids_df <- function(x) {
   x |>
-    select(-.data$Taxa, -ends_with("(SD)")) |>
+    select(-.data$Taxa, -ends_with("(SD)"), -ends_with("(n)")) |>
     pivot_longer(
       cols = .data$`24:0`:.data$`20:5w3`, values_to = "mean",
       names_to = "tracer"
     ) |>
     left_join(
       x |>
-        select(.data$source, -.data$Taxa, ends_with("(SD)"), .data$Study) |>
+        select(.data$source, ends_with("(SD)"), .data$Study) |>
         pivot_longer(
           cols = ends_with("(SD)"), values_to = "sd", names_to = "tracer"
         ) |>
         mutate(tracer = gsub(" (SD)", "", .data$tracer, fixed = TRUE)),
+      by = c("source", "Study", "tracer")
+    ) |>
+    left_join(
+      x |>
+        select(.data$source, ends_with("(n)"), .data$Study) |>
+        pivot_longer(
+          cols = ends_with("(n)"), values_to = "n", names_to = "tracer"
+        ) |>
+        mutate(tracer = gsub(" (n)", "", .data$tracer, fixed = TRUE)),
       by = c("source", "Study", "tracer")
     ) |>
     mutate(tracer_family = "fa")
@@ -204,9 +222,11 @@ reshape_fattyacids_df <- function(x) {
 #' This function generates a plot to compare the mixing proportions between two data streams 
 #' (e.g., chemical tracers and eDNA) for synthetic datasets with agreement and disagreement.
 #'
-#' @inheritParams mixmustr_wrangle_input
 #' @param synth_list_d A list representing the synthetic dataset with divergent mixing proportions.
 #' @param synth_list_c A list representing the synthetic dataset with convergent mixing proportions.
+#' @param mu_tab A data frame containing the mean tracer
+#' signatures for each source. The first column should be named `source`, and
+#' the remaining columns should contain numeric tracer values.
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object visualizing the comparison of mixing proportions between the two data streams.
 #'
@@ -225,8 +245,7 @@ reshape_fattyacids_df <- function(x) {
 #' @importFrom rlang .data
 #'
 #' @examples
-#' # Assuming `synthetic_df_divergent`, `synthetic_df_convergent`, and
-#' # `tracer_parameters$mus` are loaded
+#' library(mixmustr)
 #' compare_mixing_proportions(
 #'   synth_list_d = synthetic_df_divergent,
 #'   synth_list_c = synthetic_df_convergent,
