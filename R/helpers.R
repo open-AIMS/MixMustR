@@ -1,8 +1,26 @@
-#' @importFrom dplyr %>% mutate rowwise c_across
+#' Calculates unsampled mixing proportions
+#' 
+#' @inheritParams mixmustr_wrangle_input
+#' @param target The target element of `data_streams_list`, typically
+#' `"df_stream_2"`.
+#' @param order_ref A character vector specifying the correct order of the
+#' source names.
+#' 
+#' @importFrom dplyr mutate rowwise c_across
 #' @importFrom tidyselect everything
-#' @noRd
-reshape_ref_data <- function(x, target = "df_stream_2", order_ref) {
-  (x[[target]][, order_ref]) |>
+#' 
+#' @return A matrix of N x (J + 1), with the + 1 representing the
+#' mixing proportions from the unsampled source(s).
+#' 
+#' @examples
+#' library(mixmustr)
+#' reshape_ref_data(synthetic_df_convergent, target = "df_stream_2",
+#'                  order_ref = tracer_parameters$mus$source)
+#' 
+#' @export
+reshape_ref_data <- function(data_streams_list, target = "df_stream_2",
+                             order_ref) {
+  (data_streams_list[[target]][, order_ref]) |>
     rowwise() |>
     mutate(Unsampled = 1 - sum(c_across(everything()))) |>
     as.matrix() |>

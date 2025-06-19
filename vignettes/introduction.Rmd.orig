@@ -137,7 +137,15 @@ make_post_prop_long(
   )
 ```
 
-This plot compares observed vs. predicted mixing proportions for data stream 2, helping you assess how well the model captures the underlying signal.
+This plot compares observed vs. predicted mixing proportions for data stream 2, helping you assess how well the model captures the underlying signal. You can also explore how the model estimates compare to the stream 2 benchmark using Bayesian R^2^ ([Gelman *et al.*, 2019](http://doi.org/10.1080/00031305.2018.1549100)):
+
+```{r}
+mixmustr_bayes_R2(
+  model_fits[[1]]$model, summary = TRUE,
+  data_streams_list = synthetic_df_convergent, target = "df_stream_2",
+  order_ref = tracer_parameters$mus$source
+)
+```
 
 ---
 

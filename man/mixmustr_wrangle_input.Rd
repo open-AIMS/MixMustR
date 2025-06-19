@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{mixmustr_wrangle_input}
 \alias{mixmustr_wrangle_input}
-\title{mixmustr_wrangle_input}
+\title{Creates the input list for the Stan model}
 \usage{
 mixmustr_wrangle_input(
   data_streams_list,
@@ -51,7 +51,7 @@ A list containing all the data elements necessary to run the Stan
 code contained within \code{model_path}.
 }
 \description{
-Creates the input list for the Stan model.
+Creates the input list for the Stan model
 }
 \details{
 The \code{mixmustr_wrangle_input} function prepares the input data for the Stan

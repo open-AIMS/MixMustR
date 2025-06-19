@@ -1,6 +1,4 @@
-#' build_stancode
-#'
-#' Builds underlying Stan code for \code{\link{mixmustr}} model of choice.
+#' Builds underlying Stan code for \code{\link{mixmustr}} model of choice
 #'
 #' @param sample_tracer A logical vector, defaults to FALSE.
 # Should the model estimate uncertainty around sampled sources signatures?
@@ -282,9 +280,7 @@ check_sd_tabs <- function(to_eval, mus, param = "SDs") {
   }
 }
 
-#' mixmustr_wrangle_input
-#'
-#' Creates the input list for the Stan model.
+#' Creates the input list for the Stan model
 #'
 #' @inheritParams build_stancode
 #' @param data_streams_list A list containing the input
@@ -467,9 +463,7 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
   out
 }
 
-#' run_mixmustr_models
-#' 
-#' Runs a set of Stan models.
+#' Runs a set of mixmustr models in Stan
 #' 
 #' @inheritParams mixmustr_wrangle_input
 #' @param model_choices A data frame specifying the model configurations to
@@ -542,9 +536,7 @@ run_mixmustr_models <- function(model_choices, data_streams_list, tracer_list,
   models
 }
 
-#' run_mixmod
-#' 
-#' Wrapper to run mixture model in Stan.
+#' Wrapper to run mixture model in Stan
 #' 
 #' @inheritParams mixmustr_wrangle_input
 #' @param mod_name_suffix A character string used to create a unique model name.

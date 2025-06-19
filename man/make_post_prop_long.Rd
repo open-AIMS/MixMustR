@@ -22,7 +22,7 @@ details for the expected structure of these.}
 \item{n}{A numeric or character value representing the variant identifier for
 the model.}
 
-\item{...}{Additional arguments passed to internal function.}
+\item{...}{Further arguments passed to \code{\link{reshape_ref_data}}.}
 }
 \value{
 A data frame in long format with the following columns:

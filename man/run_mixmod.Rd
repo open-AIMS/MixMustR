@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{run_mixmod}
 \alias{run_mixmod}
-\title{run_mixmod}
+\title{Wrapper to run mixture model in Stan}
 \usage{
 run_mixmod(model_path, mod_name_suffix, ...)
 }
@@ -15,7 +15,7 @@ file.}
 \item{...}{Additional arguments passed to \code{\link[rstan]{stan}}.}
 }
 \description{
-Wrapper to run mixture model in Stan.
+Wrapper to run mixture model in Stan
 }
 \seealso{
 \code{\link{run_mixmustr_models}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{run_mixmustr_models}
 \alias{run_mixmustr_models}
-\title{run_mixmustr_models}
+\title{Runs a set of mixmustr models in Stan}
 \usage{
 run_mixmustr_models(
   model_choices,
@@ -42,7 +42,7 @@ A list where each element corresponds to a model configuration,
 containing the run time and model output.
 }
 \description{
-Runs a set of Stan models.
+Runs a set of mixmustr models in Stan
 }
 \details{
 The \code{run_mixmustr_models} function automates the process of running

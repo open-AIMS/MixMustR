@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{build_stancode}
 \alias{build_stancode}
-\title{build_stancode}
+\title{Builds underlying Stan code for \code{\link{mixmustr}} model of choice}
 \usage{
 build_stancode(
   sample_tracer = FALSE,
@@ -26,7 +26,7 @@ a hierarchical grouping structure?}
 Nothing.
 }
 \description{
-Builds underlying Stan code for \code{\link{mixmustr}} model of choice.
+Builds underlying Stan code for \code{\link{mixmustr}} model of choice
 }
 \details{
 \code{\link{mixmustr}} currently allows for eight model variants
