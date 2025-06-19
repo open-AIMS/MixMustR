@@ -1,4 +1,4 @@
-// Code built by MixMustR on 2025-06-19 02:36:31.800504
+// Code built by MixMustR on 2025-06-19 07:58:54.007656
 // User options:
 	// sample_tracer = TRUE
 	// fix_unsampled = TRUE
@@ -12,7 +12,7 @@ data {
 	matrix[N, J + 1] sigma_ln_rho; // Confidence around `ln_rho`
 	matrix[J, K] x; // sample means for each source and tracer
 	matrix<lower=0>[J, K] s; // sample SDs for each source and tracer
-	int<lower=1> m[J]; // source-specific sample size
+	matrix<lower=1>[J, K] m; // source- and tracer- specific sample size
 	int<lower=1> R; // number of levels in the hierarchical structure
 	int<lower=1> YR[N]; // dummy vector of random levels
 }
@@ -32,7 +32,7 @@ transformed parameters {
 	}
 	for (j in 1:J) {
 		for (k in 1:K) {
-			omega[j, k] = sqrt((s[j, k]^2 * (m[j] - 1)) / nu[j, k]);
+			omega[j, k] = sqrt((s[j, k]^2 * (m[j, k] - 1)) / nu[j, k]);
 		}
 	}
 }
@@ -40,8 +40,8 @@ model {
 	// Sampling sources
 	for (j in 1:J) {
 		for (k in 1:K) {
-			target += chi_square_lpdf(m[j] | nu[j, k]);
-			target += normal_lpdf(x[j, k] | mu[j, k], s[j, k] / sqrt(m[j]));
+			target += chi_square_lpdf(m[j, k] | nu[j, k]);
+			target += normal_lpdf(x[j, k] | mu[j, k], s[j, k] / sqrt(m[j, k]));
 		}
 	}
 	// Mixture model

@@ -13,9 +13,11 @@
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/make_post_prop_long.html</loc></url>
 <url><loc>/reference/mixmustr-package.html</loc></url>
+<url><loc>/reference/mixmustr_bayes_R2.html</loc></url>
 <url><loc>/reference/mixmustr_models.html</loc></url>
 <url><loc>/reference/mixmustr_wrangle_input.html</loc></url>
 <url><loc>/reference/plot_multiple_faceted_scatter_avg.html</loc></url>
+<url><loc>/reference/reshape_ref_data.html</loc></url>
 <url><loc>/reference/run_mixmod.html</loc></url>
 <url><loc>/reference/run_mixmustr_models.html</loc></url>
 <url><loc>/reference/synthetic_df_convergent.html</loc></url>
