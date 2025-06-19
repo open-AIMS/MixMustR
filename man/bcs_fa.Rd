@@ -46,7 +46,8 @@ bcs_fa
 }
 \description{
 This dataset contains the fatty acid composition of various sources,
-including macroalgae, mangroves, saltmarsh, seagrass, plankton, and
+including macroalgae, mangroves, saltmarsh, seagrass, SPOM (suspended
+particulate organic matter), and
 terrestrial grass. The data includes mean values, standard deviations and
 sample sizes for different fatty acids, as well as the study from which the
 data was sourced. Values of 0 standard deviation have been arbitrarily

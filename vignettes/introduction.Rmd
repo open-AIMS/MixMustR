@@ -143,7 +143,7 @@ mixmustr_bayes_R2(
 #>              Source mean 2.5%HDI 97.5%HDI
 #> 1        Macroalgae 0.98    0.97     0.99
 #> 2          Mangrove 0.98    0.98     0.99
-#> 3          Plankton 0.99    0.98     0.99
+#> 3              SPOM 0.99    0.98     0.99
 #> 4         Saltmarsh 0.97    0.96     0.98
 #> 5          Seagrass 0.98    0.97     0.99
 #> 6 Terrestrial grass 0.98    0.97     0.99

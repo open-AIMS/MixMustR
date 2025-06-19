@@ -2,9 +2,11 @@
 #'
 #' This dataset contains stable isotope ratios
 #' (\eqn{\delta^{13}C} and \eqn{\delta^{15}N}), their standard deviations and
-#' sample sizes for various sources in the BCS study. Notice that the sample
-#' sizes for Terrestrial grass were not provided in the original source
-#' (Goni & Thomas, 2000) and were therefore arbitrarily set to 15.
+#' sample sizes for various sources, including macroalgae, mangroves, saltmarsh,
+#' seagrass, SPOM (suspended particulate organic matter), and terrestrial grass
+#' Notice that the sample sizes for Terrestrial grass were not provided in the
+#' original source (Goni & Thomas, 2000) and were therefore arbitrarily set to
+#' 15.
 #'
 #' @format A data frame with 6 rows and 6 variables:
 #' \describe{
