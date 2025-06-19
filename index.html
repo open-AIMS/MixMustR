@@ -121,15 +121,15 @@
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(mixmustr)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>rstan<span class="sc">::</span><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>mus <span class="ot">&lt;-</span> tracer_parameters<span class="sc">$</span>mus</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>sigmas <span class="ot">&lt;-</span> tracer_parameters<span class="sc">$</span>sigmas</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># As an example, we pick mixmustr_models[6, ] because it runs quickest. It is</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># non-hierarchical and does not estimate (un)sampled tracer signatures.</span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>model_fits <span class="ot">&lt;-</span> <span class="fu">run_mixmustr_models</span>(</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  mixmustr_models, synthetic_df_convergent, mus, sigmas, <span class="at">sigma_ln_rho =</span> <span class="fl">0.1</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">iter =</span> <span class="fl">1e4</span>, <span class="at">warmup =</span> <span class="fl">5e3</span>, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">cores =</span> <span class="dv">4</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  mixmustr_models[<span class="dv">6</span>, ], synthetic_df_convergent, tracer_parameters,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">sigma_ln_rho =</span> <span class="fl">0.1</span>, <span class="at">iter =</span> <span class="fl">1e4</span>, <span class="at">warmup =</span> <span class="fl">5e3</span>, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">cores =</span> <span class="dv">4</span></span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>)</span>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># then visualise a particular output</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">make_post_prop_long</span>(model_fits[[<span class="dv">1</span>]]<span class="sc">$</span>model, mus, synthetic_df_convergent,</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                    <span class="at">target =</span> <span class="st">"df_stream_2"</span>, <span class="at">n =</span> <span class="dv">1</span>)<span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">make_post_prop_long</span>(model_fits[[<span class="dv">1</span>]]<span class="sc">$</span>model, tracer_parameters<span class="sc">$</span>mus,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                    synthetic_df_convergent, <span class="at">target =</span> <span class="st">"df_stream_2"</span>, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
 <span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="fu">plot_multiple_faceted_scatter_avg</span>() <span class="sc">+</span></span>
 <span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
 <span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Observed (simulated) from eDNA (data stream 2)"</span>,</span>
