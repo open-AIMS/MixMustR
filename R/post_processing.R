@@ -118,7 +118,7 @@ make_post_prop_long <- function(modfit, mu_tab, data_streams_list, n, ...) {
 #' @export
 mixmustr_bayes_R2 <- function(modfit, summary = TRUE, ...) {
   ref_data <- reshape_ref_data(...)
-  all_posts <- rstan::extract(modfit)$p
+  all_posts <- extract(modfit)$p
   new_dims <- c(ncol(all_posts), dim(all_posts)[3], nrow(all_posts))
   pred_y <- res_y <- array(0, dim = new_dims)
   for (i in seq_len(dim(all_posts)[3])) {
