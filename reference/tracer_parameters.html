@@ -110,29 +110,29 @@ sample sizes. These values are used as inputs for mixture modelling in the
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">tracer_parameters</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ mus   : tibble [6 × 9] (S3: tbl_df/tbl/data.frame)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "SPOM" "Saltmarsh" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): num [1:6] -20.4 -27.7 -19.3 -24.6 -15.1 -13.3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): num [1:6] 2.4 4.4 6.2 2.31 1.2 1.69</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 24:0      : num [1:6] 0 2.73 0 3.3 0 0.29</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:1w9    : num [1:6] 9.46 14.13 18.5 9.1 4 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:2w6    : num [1:6] 6.04 15.48 0.56 18.35 27 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:3w3    : num [1:6] 7.17 28.3 1.42 24.85 33 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:4w6    : num [1:6] 14.271 0.105 0.38 0 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:5w3    : num [1:6] 5.51 0 4.68 0 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "Saltmarsh" "Seagrass" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): num [1:6] -20.4 -27.7 -24.6 -15.1 -19.3 -13.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): num [1:6] 2.4 4.4 2.31 1.2 6.2 1.69</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 24:0      : num [1:6] 0 2.73 3.3 0 0 0.29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:1w9    : num [1:6] 9.46 14.13 9.1 4 18.5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:2w6    : num [1:6] 6.04 15.48 18.35 27 0.56 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:3w3    : num [1:6] 7.17 28.3 24.85 33 1.42 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:4w6    : num [1:6] 14.271 0.105 0 1 0.38 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:5w3    : num [1:6] 5.51 0 0 1 4.68 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ sigmas: tibble [6 × 9] (S3: tbl_df/tbl/data.frame)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "SPOM" "Saltmarsh" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): num [1:6] 3.1 1.4 2.8 4.32 3 0.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): num [1:6] 1.2 2.6 3 1.67 1.3 0.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 24:0      : num [1:6] 0.01 1.4 0.01 3.3 0.01 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:1w9    : num [1:6] 1.38 1.87 10.16 7.64 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:2w6    : num [1:6] 1.871 2.002 0.602 4.455 5 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:3w3    : num [1:6] 0.955 2.523 0.259 32.598 12 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:4w6    : num [1:6] 1.97 0.21 0.85 0.01 0.5 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:5w3    : num [1:6] 3.95 0.01 3.97 0.01 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "Saltmarsh" "Seagrass" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): num [1:6] 3.1 1.4 4.32 3 2.8 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): num [1:6] 1.2 2.6 1.67 1.3 3 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 24:0      : num [1:6] 0.01 1.4 3.3 0.01 0.01 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:1w9    : num [1:6] 1.38 1.87 7.64 1 10.16 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:2w6    : num [1:6] 1.871 2.002 4.455 5 0.602 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:3w3    : num [1:6] 0.955 2.523 32.598 12 0.259 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:4w6    : num [1:6] 1.97 0.21 0.01 0.5 0.85 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 20:5w3    : num [1:6] 3.95 0.01 0.01 1 3.97 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ ns    : tibble [6 × 9] (S3: tbl_df/tbl/data.frame)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "SPOM" "Saltmarsh" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): int [1:6] 12 15 24 13 20 15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): int [1:6] 12 15 24 13 20 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ source    : chr [1:6] "Macroalgae" "Mangrove" "Saltmarsh" "Seagrass" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(13C/12C): int [1:6] 12 15 13 20 24 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ d(15N/14N): int [1:6] 12 15 13 20 24 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 24:0      : int [1:6] 10 10 10 10 10 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:1w9    : int [1:6] 10 10 10 10 10 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ 18:2w6    : int [1:6] 10 10 10 10 10 10</span>
@@ -147,9 +147,9 @@ sample sizes. These values are used as inputs for mixture modelling in the
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Macroalg…        -<span style="color: #BB0000;">20.4</span>         2.4    0        9.46     6.04     7.17   14.3  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Mangrove         -<span style="color: #BB0000;">27.7</span>         4.4    2.73    14.1     15.5     28.3     0.105</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SPOM             -<span style="color: #BB0000;">19.3</span>         6.2    0       18.5      0.56     1.42    0.38 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Saltmarsh        -<span style="color: #BB0000;">24.6</span>         2.31   3.3      9.1     18.4     24.8     0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Seagrass         -<span style="color: #BB0000;">15.1</span>         1.2    0        4       27       33       1    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Saltmarsh        -<span style="color: #BB0000;">24.6</span>         2.31   3.3      9.1     18.4     24.8     0    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Seagrass         -<span style="color: #BB0000;">15.1</span>         1.2    0        4       27       33       1    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> SPOM             -<span style="color: #BB0000;">19.3</span>         6.2    0       18.5      0.56     1.42    0.38 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Terrestr…        -<span style="color: #BB0000;">13.3</span>         1.69   0.29     1.99    12.5     40.3     1.08 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: `20:5w3` &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
@@ -160,9 +160,9 @@ sample sizes. These values are used as inputs for mixture modelling in the
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Macroalg…         3.1          1.2    0.01     1.38    1.87     0.955    1.97 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Mangrove          1.4          2.6    1.40     1.87    2.00     2.52     0.21 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SPOM              2.8          3      0.01    10.2     0.602    0.259    0.850</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Saltmarsh         4.32         1.67   3.3      7.64    4.45    32.6      0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Seagrass          3            1.3    0.01     1       5       12        0.5  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Saltmarsh         4.32         1.67   3.3      7.64    4.45    32.6      0.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Seagrass          3            1.3    0.01     1       5       12        0.5  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> SPOM              2.8          3      0.01    10.2     0.602    0.259    0.850</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Terrestr…         0.5          0.5    0.09     0.14    0.91     3.52     1.02 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: `20:5w3` &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
@@ -173,9 +173,9 @@ sample sizes. These values are used as inputs for mixture modelling in the
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Macroalg…           12           12     10       10       10       10       10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Mangrove            15           15     10       10       10       10       10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SPOM                24           24     10       10       10       10       10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Saltmarsh           13           13     10       10       10       10       10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Seagrass            20           20     10       10       10       10       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Saltmarsh           13           13     10       10       10       10       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> Seagrass            20           20     10       10       10       10       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> SPOM                24           24     10       10       10       10       10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Terrestr…           15           15     10       10       10       10       10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: `20:5w3` &lt;int&gt;</span></span>
 </code></pre></div>
