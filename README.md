@@ -1,22 +1,22 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mixmustr <img src="man/figures/logo.png" width = 180 alt="mixmustr Logo" align="right" />
+# MixMustR <img src="man/figures/logo.png" width = 180 alt="MixMustR Logo" align="right" />
 
 <!-- badges: start -->
 
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/open-aims/mixmustr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/open-aims/mixmustr/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/open-aims/MixMustR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/open-aims/MixMustR/actions/workflows/R-CMD-check.yaml)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
 [![Ask Us Anything
-!](https://img.shields.io/badge/Ask%20us-anything-1abc9c.svg)](https://github.com/open-AIMS/mixmustr/issues/new)
+!](https://img.shields.io/badge/Ask%20us-anything-1abc9c.svg)](https://github.com/open-AIMS/MixMustR/issues/new)
 ![Open Source
 Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)
 <!-- badges: end -->
 
 ## Overview
 
-`mixmustr` is a flexible Bayesian mixture model package written in the
+`MixMustR` is a flexible Bayesian mixture model package written in the
 probabilistic programming language [Stan](https://mc-stan.org/) for
 [R](https://www.r-project.org/). It estimates source mixing proportions
 by incorporating simultaneous likelihood evaluation from two independent
@@ -24,9 +24,9 @@ data streams collected from the mixture of interest (Fig. 1a–b): one
 obtained from chemical tracers/biomarkers (i.e., a single tracer
 measurement per observation, e.g., from stable isotopes and fatty
 acids), and another yielding source composition (e.g., based on eDNA).
-`mixmustr` also allows for the estimation of an additional, unsampled
+`MixMustR` also allows for the estimation of an additional, unsampled
 source component to partially relax the assumption that the mixing
-proportions from all samples sources should sum up to 1. `mixmustr`
+proportions from all samples sources should sum up to 1. `MixMustR`
 should have wide applicability in ecological studies, particularly given
 the growing usage and availability of multiple tracers spanning
 traditional stable isotopes and eDNA to understand carbon source-sink
@@ -46,7 +46,7 @@ trophic interactions (e.g., [Nielsen *et al.*
 <img src="man/figures/diagram.png" width = 800/>
 </p>
 
-**Figure 1:** `mixmustr` input data and framework. `mixmustr` relies on
+**Figure 1:** `MixMustR` input data and framework. `MixMustR` relies on
 two independent data streams that are collected from the same *N*
 samples. a) the first stream (blue panel) is characterised by the
 canonical chemical tracer/biomarker (e.g., stable isotope, fatty acid)
@@ -61,7 +61,7 @@ b) The second stream (yellow panel) is yielded by community composition
 datasets which can be transformed to mixing proportions, such as those
 obtained via eDNA or metabarcoding techniques. This stream of
 information can reveal mixture sources beyond the original *J* sources
-considered by researchers, and `mixmustr` leverages that information by
+considered by researchers, and `MixMustR` leverages that information by
 combining those additional sources into one single *unsampled* source,
 which would amount to the question mark in the first data stream. Given
 these data, the user can choose among eight model variants based on
@@ -69,7 +69,7 @@ three choices (c—e, see below for more explanations).
 
 ## Model variants
 
-`mixmustr` currently allows for eight model variants which result from
+`MixMustR` currently allows for eight model variants which result from
 three user-driven binary choices: 1) should the model only ingest the
 mean sampled-source tracer signatures (equivalent to “residual-only
 error” structure of the widely-used
@@ -85,7 +85,7 @@ grouping structure? (Fig. 1e).
 
 ## Synthetic datasets
 
-`mixmustr` comes with two synthetic mixture datasets,
+`MixMustR` comes with two synthetic mixture datasets,
 `synthetic_df_convergent` and `synthetic_df_divergent`. Both are
 anchored to empirical values of stable isotopes and fatty acids for a
 range of plant carbon sources in marine soils. They are hierarchical in
@@ -96,7 +96,7 @@ proportions between data streams 1 and 2, with `synthetic_df_convergent`
 exhibiting little difference, whereas `synthetic_df_divergent` exhibits
 larger difference:
 
-    library(mixmustr)
+    library(MixMustR)
     mus <- tracer_parameters$mus
     compare_mixing_proportions(synthetic_df_divergent, synthetic_df_convergent, mus)
 
@@ -117,9 +117,9 @@ The current development version can be downloaded from GitHub via
     if (!requireNamespace("remotes")) {
       install.packages("remotes")
     }
-    remotes::install_github("open-aims/mixmustr", ref = "main")
+    remotes::install_github("open-aims/MixMustR", ref = "main")
 
-Because `mixmustr` is based on [Stan](https://mc-stan.org/), a C++
+Because `MixMustR` is based on [Stan](https://mc-stan.org/), a C++
 compiler is required. The program
 [Rtools](https://cran.r-project.org/bin/windows/Rtools/) comes with a
 C++ compiler for Windows. On Mac, you should install Xcode. See the
@@ -132,7 +132,7 @@ further instructions on how to get the compilers running.
 See package documentation and online vignettes for full explanation of
 expected structure of input variables.
 
-    library(mixmustr)
+    library(MixMustR)
     options(mc.cores = parallel::detectCores())
     rstan::rstan_options(auto_write = TRUE)
     # As an example, we pick mixmustr_models[6, ] because it runs quickest. It is
@@ -152,6 +152,6 @@ expected structure of input variables.
 
 ## Further Information
 
-`mixmustr` is provided by the [Australian Institute of Marine
+`MixMustR` is provided by the [Australian Institute of Marine
 Science](https://www.aims.gov.au/) under the MIT License
 ([MIT](https://opensource.org/license/mit)).
