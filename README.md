@@ -129,8 +129,9 @@ further instructions on how to get the compilers running.
 
 ## Usage
 
-See package documentation and online vignettes for full explanation of
-expected structure of input variables.
+See package documentation and [online
+vignettes](https://open-aims.github.io/MixMustR/articles/introduction.html)
+for full explanation of expected structure of input variables.
 
     library(MixMustR)
     options(mc.cores = parallel::detectCores())
