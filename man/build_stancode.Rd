@@ -29,7 +29,7 @@ Nothing.
 Builds underlying Stan code for MixMustR model of choice
 }
 \details{
-\code{\link{MixMustR}} currently allows for eight model variants
+\code{MixMustR} currently allows for eight model variants
 which result from three user-driven binary choices: 1) should the model only
 ingest the mean sampled-source tracer signatures (equivalent to
 "residual-only error" structure of MixSIAR; Stock et al. 2018) or should it
