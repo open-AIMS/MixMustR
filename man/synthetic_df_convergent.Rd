@@ -16,7 +16,7 @@ used for testing purposes}
 }
 }
 \source{
-The synthetic dataset was generated programmatically using the \code{mixmustr} package. The input data sources are:
+The synthetic dataset was generated programmatically using the \code{MixMustR} package. The input data sources are:
 \itemize{
 \item Stable isotope data: See \code{bcs_si} documentation.
 \item Fatty acid data: See \code{bcs_fa} documentation.
@@ -26,12 +26,13 @@ The synthetic dataset was generated programmatically using the \code{mixmustr} p
 synthetic_df_convergent
 }
 \description{
-This dataset is a synthetic dataset generated to simulate mixture data for testing and validation purposes in the \code{mixmustr} package. It is anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils stable isotope data (\code{bcs_si}), fatty acid data (\code{bcs_fa}), and synthetic mixture proportions. \code{synthetic_df_convergent} exhibits little difference in the underlying mixing proportions between data streams 1 and 2.
+This dataset is a synthetic dataset generated to simulate mixture data for testing and validation purposes in the \code{MixMustR} package. It is anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils stable isotope data (\code{bcs_si}), fatty acid data (\code{bcs_fa}), and synthetic mixture proportions. \code{synthetic_df_convergent} exhibits little difference in the underlying mixing proportions between data streams 1 and 2.
 }
 \details{
 The dataset was generated using the non-exported \code{make_mixture_data} function, which combines stable isotope data (\code{bcs_si}), fatty acid data (\code{bcs_fa}), and synthetic proportions (\code{stream_1_props} and \code{stream_2_props}) to produce simulated mixture data. The \code{truth_stream} parameter determines which stream's proportions are used as the "true" source contributions.
 }
 \examples{
+library(MixMustR)
 data(synthetic_df_convergent)
 str(synthetic_df_convergent)
 }

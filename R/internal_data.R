@@ -245,7 +245,7 @@ reshape_fattyacids_df <- function(x) {
 #' @importFrom rlang .data
 #'
 #' @examples
-#' library(mixmustr)
+#' library(MixMustR)
 #' compare_mixing_proportions(
 #'   synth_list_d = synthetic_df_divergent,
 #'   synth_list_c = synthetic_df_convergent,

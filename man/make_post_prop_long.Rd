@@ -2,7 +2,7 @@
 % Please edit documentation in R/post_processing.R
 \name{make_post_prop_long}
 \alias{make_post_prop_long}
-\title{Create Long-Format Posterior Proportions from mixmustr model fits}
+\title{Create Long-Format Posterior Proportions from MixMustR model fits}
 \usage{
 make_post_prop_long(modfit, mu_tab, data_streams_list, n, ...)
 }
@@ -46,7 +46,7 @@ The \verb{Variant:} column is used to distinguish between different models.
 }
 \examples{
 \dontrun{
-library(mixmustr)
+library(MixMustR)
 # mixmustr_models[6, ] runs quickest
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,

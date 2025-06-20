@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{build_stancode}
 \alias{build_stancode}
-\title{Builds underlying Stan code for \code{\link{mixmustr}} model of choice}
+\title{Builds underlying Stan code for MixMustR model of choice}
 \usage{
 build_stancode(
   sample_tracer = FALSE,
@@ -26,10 +26,10 @@ a hierarchical grouping structure?}
 Nothing.
 }
 \description{
-Builds underlying Stan code for \code{\link{mixmustr}} model of choice
+Builds underlying Stan code for MixMustR model of choice
 }
 \details{
-\code{\link{mixmustr}} currently allows for eight model variants
+\code{\link{MixMustR}} currently allows for eight model variants
 which result from three user-driven binary choices: 1) should the model only
 ingest the mean sampled-source tracer signatures (equivalent to
 "residual-only error" structure of MixSIAR; Stock et al. 2018) or should it
@@ -45,7 +45,7 @@ Given these three choices, \code{\link{build_stancode}} saves a stan code
 to an output directory of the users' choosing. Nothing is returned.
 }
 \examples{
-library(mixmustr)
+library(MixMustR)
 data(mixmustr_models)
 
 build_stancode(mixmustr_models$sample_tracer[1],

@@ -41,6 +41,7 @@
 #' - Wang, S., Chu, T., Huang, D., Li, B., & Wu, J. (2014). Incorporation of Exotic *Spartina alterniflora* into Diet of Deposit-Feeding Snails in the Yangtze River Estuary Salt Marsh: Stable Isotope and Fatty Acid Analyses. *Ecosystems*, 17, 567-577. DOI:10.1007/s10021-013-9743-3
 #' 
 #' @examples
+#' library(MixMustR)
 #' data(bcs_fa)
 #' head(bcs_fa)
 "bcs_fa"

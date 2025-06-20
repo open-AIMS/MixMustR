@@ -1,10 +1,10 @@
 ---
-title: "Introduction to mixmustr"
+title: "Introduction to MixMustR"
 author: "Diego Barneche and Chris Fulton"
-date: "2025-06-19"
+date: "2025-06-20"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to mixmustr}
+  %\VignetteIndexEntry{Introduction to MixMustR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,20 +13,20 @@ vignette: >
 
 # Overview
 
-`mixmustr` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/). It estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest:
+`MixMustR` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/). It estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest:
 
 1. **Chemical tracers/biomarkers** (e.g., stable isotopes, fatty acids).
 2. **Source composition** (e.g., based on eDNA or metabarcoding).
 
-`mixmustr` also allows for the estimation of an additional, unsampled source component to partially relax the assumption that the mixing proportions from all sampled sources should sum to 1. This makes it particularly useful in ecological studies, such as understanding carbon source-sink dynamics or trophic interactions.
+`MixMustR` also allows for the estimation of an additional, unsampled source component to partially relax the assumption that the mixing proportions from all sampled sources should sum to 1. This makes it particularly useful in ecological studies, such as understanding carbon source-sink dynamics or trophic interactions.
 
 <p align="center">
   <img src="../man/figures/diagram.png" width = 800/>
 </p>
 
-**Figure 1:** `mixmustr` input data and framework.
+**Figure 1:** `MixMustR` input data and framework.
 
-This vignette will walk you through the basic usage of `mixmustr`, covering:
+This vignette will walk you through the basic usage of `MixMustR`, covering:
 
 * Preparing input data
 * Running multiple model configurations
@@ -34,7 +34,7 @@ This vignette will walk you through the basic usage of `mixmustr`, covering:
 
 ## Model Variants
 
-`mixmustr` provides eight model variants based on three user-driven binary choices:
+`MixMustR` provides eight model variants based on three user-driven binary choices:
 
 1. **Tracer signature error structure**:
    - Residual-only error (similar to MixSIAR).
@@ -48,9 +48,9 @@ This vignette will walk you through the basic usage of `mixmustr`, covering:
    - Independent observations.
    - Hierarchical grouping structure.
 
-## Synthetic Datasets in `mixmustr`
+## Synthetic Datasets in `MixMustR`
 
-The `mixmustr` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical, unbalanced ecological field sampling design.
+The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical, unbalanced ecological field sampling design.
 
 - **`synthetic_df_convergent`**: Exhibits minimal differences in the underlying mixing proportions between data streams 1 and 2.
 - **`synthetic_df_divergent`**: Exhibits significant differences in the underlying mixing proportions between data streams 1 and 2.
@@ -68,14 +68,14 @@ We begin by loading the package and setting options for parallel computing and S
 
 
 ``` r
-library(mixmustr)
+library(MixMustR)
 ```
 
 ---
 
 ## Step 1: Prepare Tracer Parameters
 
-We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source. These should be combined into a named list, and `mixmustr` provides an example list called `tracer_parameters`.
+We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source. These should be combined into a named list, and `MixMustR` provides an example list called `tracer_parameters`.
 
 These are required to inform the model about each source's chemical signature and the variability around it.
 
@@ -152,9 +152,9 @@ mixmustr_bayes_R2(
 
 ---
 
-## Recap: Using mixmustr
+## Recap: Using `MixMustR`
 
-Here's a quick summary of how to use `mixmustr` effectively:
+Here's a quick summary of how to use `MixMustR` effectively:
 
 1. **Prepare Input Data**:
 
@@ -174,6 +174,7 @@ Here's a quick summary of how to use `mixmustr` effectively:
 4. **Visualize Results**:
 
    * Use `make_post_prop_long()` and plotting functions to assess fit
+   * Use `mixmustr_bayes_R2()` to create a table of Bayesian R^2^ values
 
 ---
 

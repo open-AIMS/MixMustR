@@ -33,6 +33,7 @@
 #' - Goni, M. A., & Thomas, K. A. (2000). Sources and transformations of organic matter in surface soils and sediments from a Spartina alterniflora marsh. *Estuarine, Coastal and Shelf Science*, 50(5), 657-679. DOI:10.1006/ecss.2000.0597
 #'
 #' @examples
+#' library(MixMustR)
 #' data(bcs_si)
 #' head(bcs_si)
 "bcs_si"

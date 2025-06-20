@@ -1,4 +1,4 @@
-#' Create Long-Format Posterior Proportions from mixmustr model fits
+#' Create Long-Format Posterior Proportions from MixMustR model fits
 #'
 #' This function processes posterior draws from a Stan model to compute mean and highest density credible intervals (HDI) for mixing proportions. It reshapes the data into a long format for comparison with observed values.
 #'
@@ -36,7 +36,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(mixmustr)
+#' library(MixMustR)
 #' # mixmustr_models[6, ] runs quickest
 #' model_fits <- run_mixmustr_models(
 #'   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
@@ -72,7 +72,7 @@ make_post_prop_long <- function(modfit, mu_tab, data_streams_list, n, ...) {
     mutate(`Variant:` = as.character(.env$n))
 }
 
-#' Compute a Bayesian version of R-squared for mixture models
+#' Compute a Bayesian version of R-squared for MixMustR mixture models
 #' 
 #' @inheritParams mixmustr_wrangle_input
 #' @inheritParams make_post_prop_long
@@ -102,7 +102,7 @@ make_post_prop_long <- function(modfit, mu_tab, data_streams_list, n, ...) {
 #' 
 #' @examples
 #' \dontrun{
-#' library(mixmustr)
+#' library(MixMustR)
 #' # mixmustr_models[6, ] runs quickest
 #' model_fits <- run_mixmustr_models(
 #'   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,

@@ -1,4 +1,4 @@
-#' Builds underlying Stan code for \code{\link{mixmustr}} model of choice
+#' Builds underlying Stan code for MixMustR model of choice
 #'
 #' @param sample_tracer A logical vector, defaults to FALSE.
 # Should the model estimate uncertainty around sampled sources signatures?
@@ -11,7 +11,7 @@
 #' @param code_path A character vector indicating the file path to the
 # corresponding Stan model file, based on the parameter combination.
 #' 
-#' @details \code{\link{mixmustr}} currently allows for eight model variants
+#' @details \code{\link{MixMustR}} currently allows for eight model variants
 #' which result from three user-driven binary choices: 1) should the model only
 #' ingest the mean sampled-source tracer signatures (equivalent to
 #' "residual-only error" structure of MixSIAR; Stock et al. 2018) or should it
@@ -37,7 +37,7 @@
 #'   \code{\link{run_mixmustr_models}}
 #' 
 #' @examples
-#' library(mixmustr)
+#' library(MixMustR)
 #' data(mixmustr_models)
 #'
 #' build_stancode(mixmustr_models$sample_tracer[1],
@@ -315,7 +315,7 @@ check_sd_tabs <- function(to_eval, mus, param = "SDs") {
 #'   - `df_stream_2`: Contains the log mixing proportions. It must have the same
 #' number of rows (`N`) as `df_stream_1`. If the design is hierarchical, the
 #' first column should be named `group`, matching the `group` column in
-#' `df_stream_1`. The remaining columns (`source1`, `source2`, etc.) must
+#' `df_stream_1`. The remaining columns (e.g., `source1`, `source2`, etc.) must
 #' contain proportions (i.e., row sums up to 1, and no negative values).
 #'
 #' - `tracer_list`: A list containing up to three data frames:
@@ -324,7 +324,7 @@ check_sd_tabs <- function(to_eval, mus, param = "SDs") {
 #' matching those from data_streams_list$df_stream_2. The remaining columns
 #' should contain numeric tracer values, with names matching those in
 #' data_streams_list$df_stream_1. This data frame is required across all models
-#' in mixmustr.
+#' in `MixMustR`.
 #'
 #' - `sigmas`: A data frame containing the standard deviations of tracer
 #' signatures for each source. The structure must match that of `mus`. It
@@ -356,7 +356,7 @@ check_sd_tabs <- function(to_eval, mus, param = "SDs") {
 #'   \code{\link{run_mixmustr_models}}
 #' 
 #' @examples
-#' library(mixmustr)
+#' library(MixMustR)
 #' 
 #' # Example input data
 #' synthetic_streams_list <- list(
@@ -463,7 +463,7 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
   out
 }
 
-#' Runs a set of mixmustr models in Stan
+#' Runs a set of MixMustR models in Stan
 #' 
 #' @inheritParams mixmustr_wrangle_input
 #' @param model_choices A data frame specifying the model configurations to
@@ -474,11 +474,11 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
 #'
 #' @details
 #' The `run_mixmustr_models` function automates the process of running 
-#' multiple `mixmustr` models based on user-specified configurations. It builds 
+#' multiple `MixMustR` models based on user-specified configurations. It builds 
 #' the Stan code for each model, prepares the input data, and runs the models 
 #' sequentially. The results are returned as a list, with each element 
 #' containing the run time and model output for a specific configuration. For
-#' convenience, `mixmustr` provides the user with a built-in data frame
+#' convenience, `MixMustR` provides the user with a built-in data frame
 #' containing all of the potential allowed models \code{\link{mixmustr_models}}.
 #'
 #' @return A list where each element corresponds to a model configuration, 
@@ -492,7 +492,7 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
 #' 
 #' @examples
 #' \dontrun{
-#' library(mixmustr)
+#' library(MixMustR)
 #' # mixmustr_models[6, ] runs quickest
 #' model_fits <- run_mixmustr_models(
 #'   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,

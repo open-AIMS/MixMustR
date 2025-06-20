@@ -44,6 +44,7 @@ original source (Goni & Thomas, 2000) and were therefore arbitrarily set to
 15.
 }
 \examples{
+library(MixMustR)
 data(bcs_si)
 head(bcs_si)
 }

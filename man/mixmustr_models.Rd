@@ -3,7 +3,7 @@
 \docType{data}
 \name{mixmustr_models}
 \alias{mixmustr_models}
-\title{mixmustr Models Configuration}
+\title{MixMustR Models Configuration}
 \format{
 A data frame with 8 rows and 4 variables:
 \describe{
@@ -26,14 +26,23 @@ The data frame is generated in the \code{data-raw/mixmustr_models.R} script.
 mixmustr_models
 }
 \description{
-This data frame defines the configuration of models used in the \code{mixmustr} package. It specifies combinations of key parameters for generating and running Stan models, which are fundamental to the functions \code{mixmustr_wrangle_input} and \code{run_mixmustr_models}.
+This data frame defines the configuration of models used in the \code{MixMustR}
+package. It specifies combinations of key parameters for generating and
+running Stan models, which are fundamental to the functions
+\code{mixmustr_wrangle_input} and \code{run_mixmustr_models}.
 }
 \details{
-The \code{mixmustr_models} data frame is programmatically generated using all possible combinations of the \code{sample_tracer}, \code{fix_unsampled}, and \code{hierarchical} parameters. Each combination corresponds to a specific Stan model file, whose path is stored in the \code{code_path} column.
+The \code{mixmustr_models} data frame is programmatically generated using all
+possible combinations of the \code{sample_tracer}, \code{fix_unsampled}, and
+\code{hierarchical} parameters. Each combination corresponds to a specific Stan
+model file, whose path is stored in the \code{code_path} column.
 
-This data frame is used internally by the \code{mixmustr} package to determine which Stan model to use for a given analysis, based on user-specified options.
+This data frame is used internally by the \code{MixMustR} package to determine
+which Stan model to use for a given analysis, based on user-specified
+options.
 }
 \examples{
+library(MixMustR)
 data(mixmustr_models)
 head(mixmustr_models)
 

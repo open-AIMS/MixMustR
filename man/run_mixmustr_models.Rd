@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitting.R
 \name{run_mixmustr_models}
 \alias{run_mixmustr_models}
-\title{Runs a set of mixmustr models in Stan}
+\title{Runs a set of MixMustR models in Stan}
 \usage{
 run_mixmustr_models(
   model_choices,
@@ -42,20 +42,20 @@ A list where each element corresponds to a model configuration,
 containing the run time and model output.
 }
 \description{
-Runs a set of mixmustr models in Stan
+Runs a set of MixMustR models in Stan
 }
 \details{
 The \code{run_mixmustr_models} function automates the process of running
-multiple \code{mixmustr} models based on user-specified configurations. It builds
+multiple \code{MixMustR} models based on user-specified configurations. It builds
 the Stan code for each model, prepares the input data, and runs the models
 sequentially. The results are returned as a list, with each element
 containing the run time and model output for a specific configuration. For
-convenience, \code{mixmustr} provides the user with a built-in data frame
+convenience, \code{MixMustR} provides the user with a built-in data frame
 containing all of the potential allowed models \code{\link{mixmustr_models}}.
 }
 \examples{
 \dontrun{
-library(mixmustr)
+library(MixMustR)
 # mixmustr_models[6, ] runs quickest
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,

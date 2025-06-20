@@ -54,6 +54,7 @@ data was sourced. Values of 0 standard deviation have been arbitrarily
 transformed to 0.01.
 }
 \examples{
+library(MixMustR)
 data(bcs_fa)
 head(bcs_fa)
 }

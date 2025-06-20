@@ -2,7 +2,7 @@
 % Please edit documentation in R/post_processing.R
 \name{mixmustr_bayes_R2}
 \alias{mixmustr_bayes_R2}
-\title{Compute a Bayesian version of R-squared for mixture models}
+\title{Compute a Bayesian version of R-squared for MixMustR mixture models}
 \usage{
 mixmustr_bayes_R2(modfit, summary = TRUE, ...)
 }
@@ -24,7 +24,7 @@ R-squared values are returned in an S x (J + 1) matrix (S is the number of
 draws).
 }
 \description{
-Compute a Bayesian version of R-squared for mixture models
+Compute a Bayesian version of R-squared for MixMustR mixture models
 }
 \details{
 For an introduction to the approach, see Gelman et al. (2019)
@@ -32,7 +32,7 @@ and \url{https://github.com/jgabry/bayes_R2/}.
 }
 \examples{
 \dontrun{
-library(mixmustr)
+library(MixMustR)
 # mixmustr_models[6, ] runs quickest
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,

@@ -26,7 +26,7 @@ mixing proportions from the unsampled source(s).
 Calculates unsampled mixing proportions
 }
 \examples{
-library(mixmustr)
+library(MixMustR)
 reshape_ref_data(synthetic_df_convergent, target = "df_stream_2",
                  order_ref = tracer_parameters$mus$source)
 

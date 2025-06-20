@@ -28,18 +28,19 @@ tracer_parameters
 This built-in list contains standardised mean (\eqn{\mu}), standard deviation
 (\eqn{\sigma}) and sample size values for stable isotope and fatty acid
 tracers, derived from the \code{bcs_si} and \code{bcs_fa} datasets. It is used
-internally by the \code{mixmustr} package for modelling and analysis.
+internally by the \code{MixMustR} package for modelling and analysis.
 }
 \details{
 The \code{tracer_parameters} list is generated using the
-\code{mixmustr:::wrangle_tracer_pars} function, which processes the \code{bcs_si} and
+\code{MixMustR:::wrangle_tracer_pars} function, which processes the \code{bcs_si} and
 \code{bcs_fa} datasets to reshape and combine their tracer data. The \code{mus} element
 contains the mean values for each tracer, the \code{sigmas} element contains
 the corresponding standard deviations and the \code{ns} element contains the
 sample sizes. These values are used as inputs for mixture modelling in the
-\code{mixmustr} package.
+\code{MixMustR} package.
 }
 \examples{
+library(MixMustR)
 data(tracer_parameters)
 str(tracer_parameters)
 

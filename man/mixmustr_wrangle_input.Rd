@@ -65,7 +65,7 @@ labels, and the remaining columns should contain numeric tracer values.
 \item \code{df_stream_2}: Contains the log mixing proportions. It must have the same
 number of rows (\code{N}) as \code{df_stream_1}. If the design is hierarchical, the
 first column should be named \code{group}, matching the \code{group} column in
-\code{df_stream_1}. The remaining columns (\code{source1}, \code{source2}, etc.) must
+\code{df_stream_1}. The remaining columns (e.g., \code{source1}, \code{source2}, etc.) must
 contain proportions (i.e., row sums up to 1, and no negative values).
 }
 \item \code{tracer_list}: A list containing up to three data frames:
@@ -74,7 +74,7 @@ source. The first column should be named \code{source}, with source names
 matching those from data_streams_list$df_stream_2. The remaining columns
 should contain numeric tracer values, with names matching those in
 data_streams_list$df_stream_1. This data frame is required across all models
-in mixmustr.
+in \code{MixMustR}.
 \item \code{sigmas}: A data frame containing the standard deviations of tracer
 signatures for each source. The structure must match that of \code{mus}. It
 cannot contain NAs.
@@ -93,7 +93,7 @@ around sampled source signatures.
 }
 }
 \examples{
-library(mixmustr)
+library(MixMustR)
 
 # Example input data
 synthetic_streams_list <- list(

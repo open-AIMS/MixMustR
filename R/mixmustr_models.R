@@ -1,6 +1,9 @@
-#' mixmustr Models Configuration
+#' MixMustR Models Configuration
 #'
-#' This data frame defines the configuration of models used in the `mixmustr` package. It specifies combinations of key parameters for generating and running Stan models, which are fundamental to the functions `mixmustr_wrangle_input` and `run_mixmustr_models`.
+#' This data frame defines the configuration of models used in the `MixMustR`
+#' package. It specifies combinations of key parameters for generating and
+#' running Stan models, which are fundamental to the functions
+#' `mixmustr_wrangle_input` and `run_mixmustr_models`.
 #'
 #' @format A data frame with 8 rows and 4 variables:
 #' \describe{
@@ -16,14 +19,20 @@
 #' corresponding Stan model file, based on the parameter combination.}
 #' }
 #' @details
-#' The `mixmustr_models` data frame is programmatically generated using all possible combinations of the `sample_tracer`, `fix_unsampled`, and `hierarchical` parameters. Each combination corresponds to a specific Stan model file, whose path is stored in the `code_path` column.
+#' The `mixmustr_models` data frame is programmatically generated using all
+#' possible combinations of the `sample_tracer`, `fix_unsampled`, and
+#' `hierarchical` parameters. Each combination corresponds to a specific Stan
+#' model file, whose path is stored in the `code_path` column.
 #'
-#' This data frame is used internally by the `mixmustr` package to determine which Stan model to use for a given analysis, based on user-specified options.
+#' This data frame is used internally by the `MixMustR` package to determine
+#' which Stan model to use for a given analysis, based on user-specified
+#' options.
 #'
 #' @source
 #' The data frame is generated in the `data-raw/mixmustr_models.R` script.
 #'
 #' @examples
+#' library(MixMustR)
 #' data(mixmustr_models)
 #' head(mixmustr_models)
 #' 
