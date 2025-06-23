@@ -239,7 +239,7 @@ mixing proportions from data stream 2.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_mixmustr_models.html">run_mixmustr_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">6</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span>
-<span>  sigma_ln_rho <span class="op">=</span> <span class="fl">0.1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  sigma_ln_rho <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Importantly, MixMustR ingests that confidence at the <em>observation
 and source</em> level. If the user inputs a single numeric value for
@@ -255,8 +255,8 @@ uncertainty for each source and observation should be (what has to come
 from expect knowledge), it does allow the user to fine tune
 <code>sigma_ln_rho</code> until the appropriate variability in input
 mixing proportions is achieved. As an example, we show the expected
-variability in mixing proportions that would result from the value of
-0.1 above:</p>
+variability in mixing proportions that would result from the value of 1
+above:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># An observation from input mixing proportion in data stream 2, remove the group</span></span>
 <span><span class="co">#  column.</span></span>
@@ -267,6 +267,9 @@ variability in mixing proportions that would result from the value of
 <span><span class="fu">MixMustR</span><span class="fu">::</span><span class="fu"><a href="../reference/evaluate_uncertainty.html">evaluate_uncertainty</a></span><span class="op">(</span><span class="va">pis</span>, <span class="va">sigma_ln_rho</span><span class="op">)</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
 <p align="center">
 <img src="vignette-fig-unnamed-chunk-4-1.png" width="90%"></p>
+<p>So a decent amount of variation is allowed with this value. This
+could reflect, for example, weak confidence in the mixing proportion
+observations in data stream 2.</p>
 <div class="section level4">
 <h4 id="behind-the-scenes">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes"></a>
 </h4>
@@ -318,13 +321,13 @@ al.</em>, 2019</a>):</p>
 <span>  order_ref <span class="op">=</span> <span class="va">tracer_parameters</span><span class="op">$</span><span class="va">mus</span><span class="op">$</span><span class="va">source</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;              Source mean 2.5%HDI 97.5%HDI</span></span>
-<span><span class="co">#&gt; 1        Macroalgae 0.98    0.97     0.99</span></span>
-<span><span class="co">#&gt; 2          Mangrove 0.98    0.98     0.99</span></span>
-<span><span class="co">#&gt; 3         Saltmarsh 0.99    0.98     0.99</span></span>
-<span><span class="co">#&gt; 4          Seagrass 0.97    0.96     0.98</span></span>
-<span><span class="co">#&gt; 5              SPOM 0.98    0.97     0.99</span></span>
-<span><span class="co">#&gt; 6 Terrestrial grass 0.98    0.97     0.99</span></span>
-<span><span class="co">#&gt; 7         Unsampled 0.99    0.98     0.99</span></span></code></pre></div>
+<span><span class="co">#&gt; 1        Macroalgae 0.57    0.48     0.66</span></span>
+<span><span class="co">#&gt; 2          Mangrove 0.61    0.52     0.70</span></span>
+<span><span class="co">#&gt; 3         Saltmarsh 0.64    0.60     0.69</span></span>
+<span><span class="co">#&gt; 4          Seagrass 0.61    0.57     0.66</span></span>
+<span><span class="co">#&gt; 5              SPOM 0.53    0.40     0.67</span></span>
+<span><span class="co">#&gt; 6 Terrestrial grass 0.59    0.49     0.68</span></span>
+<span><span class="co">#&gt; 7         Unsampled 0.61    0.57     0.66</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
