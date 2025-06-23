@@ -78,7 +78,7 @@
                         <h4 data-toc-skip class="author">Diego Barneche
 and Chris Fulton</h4>
             
-            <h4 data-toc-skip class="date">2025-06-20</h4>
+            <h4 data-toc-skip class="date">2025-06-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/open-aims/MixMustR/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
@@ -146,6 +146,9 @@ user-driven binary choices:</p>
 </ul>
 </li>
 </ol>
+<p>The combination of these three choices is pre-packaged in
+<code>MixMustR</code> via the data frame
+<code>mixmustr_models</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="synthetic-datasets-in-mixmustr">Synthetic Datasets in <code>MixMustR</code><a class="anchor" aria-label="anchor" href="#synthetic-datasets-in-mixmustr"></a>
@@ -167,21 +170,32 @@ streams 1 and 2.</li>
 significant differences in the underlying mixing proportions between
 data streams 1 and 2.</li>
 </ul>
-<p>Each dataset is a list containing three data frames: 1.
-<strong><code>df_stream_1</code></strong>: Simulated mixture data for
-the first stream, including tracer estimates. 2.
-<strong><code>df_stream_2</code></strong>: Synthetic proportions for the
-second stream, with a column for each source. 3.
-<strong><code>stream_1_props</code></strong>: Synthetic proportions for
-the first stream, used for testing purposes.</p>
-<p>These datasets were generated using the internal
-<code>make_mixture_data</code> function, which combines stable isotope
-data (<code>bcs_si</code>), fatty acid data (<code>bcs_fa</code>), and
-synthetic proportions. The <code>truth_stream</code> parameter specifies
-the stream used as the “true” source contributions. These datasets are
-valuable for evaluating the ability of model variants to retrieve
-underlying mixture proportions, with diagnostic tools available for
-summary and visualization.</p>
+<p>Each dataset is a list containing three data frames:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong><code>df_stream_1</code></strong>: Simulated mixture data
+for the first stream, including tracer estimates. Its size is N
+observations by K tracers. It also contains an additional column named
+<code>group</code>, which captures the grouping structure of this
+synthetic dataset. This group column is not mandatory, e.g., in case all
+observations are independent.</p></li>
+<li><p><strong><code>df_stream_2</code></strong>: Synthetic proportions
+for the second stream, with a column for each source. Its size is N
+observations by J sources. At the observation/row level, the sum should
+be constrained between 0 and 1. Like <code>df_stream_1</code>, it also
+contains an additional column named <code>group</code>, which captures
+the grouping structure of this synthetic dataset.</p></li>
+<li><p><strong><code>stream_1_props</code></strong>: Synthetic
+proportions for the first stream. This data frame is not a mandatory
+requirement to run models in <code>MixMustR</code>, it is only exported
+and used for testing purposes.</p></li>
+</ol>
+<p>These datasets and their underlying simulated synthetic proportions
+were generated using internal non-exported functions, combining data
+from stable isotopes (<code>bcs_si</code>) and fatty acids
+(<code>bcs_fa</code>). These synthetic datasets are valuable for
+evaluating the ability of model variants to retrieve underlying mixture
+proportions, and <code>MixMustR</code> offers diagnostic tools available
+for summary and visualization.</p>
 </div>
 <div class="section level3">
 <h3 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -189,19 +203,21 @@ summary and visualization.</p>
 <p>We begin by loading the package and setting options for parallel
 computing and Stan:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-aims.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-aims.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span>
+<span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/rstan_options.html" class="external-link">rstan_options</a></span><span class="op">(</span>auto_write <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="step-1-prepare-tracer-parameters">Step 1: Prepare Tracer Parameters<a class="anchor" aria-label="anchor" href="#step-1-prepare-tracer-parameters"></a>
 </h3>
 <p>We’ll assume you have access to source tracer summaries—mean
-(<code>mus</code>) and standard deviation (<code>sigmas</code>) values
-for each source. These should be combined into a named list, and
-<code>MixMustR</code> provides an example list called
-<code>tracer_parameters</code>.</p>
+(<code>mus</code>), standard deviation (<code>sigmas</code>) and sample
+size (<code>ns</code>) values for each source. These should be combined
+into a named list, and <code>MixMustR</code> provides an example list
+called <code>tracer_parameters</code>.</p>
 <p>These are required to inform the model about each source’s chemical
-signature and the variability around it.</p>
+signatures and the variability around them.</p>
 <hr>
 </div>
 <div class="section level3">
@@ -210,12 +226,47 @@ signature and the variability around it.</p>
 <p>The core function to run models is
 <code><a href="../reference/run_mixmustr_models.html">run_mixmustr_models()</a></code>. This function allows you to run
 multiple models defined in the built-in <code>mixmustr_models</code>
-data frame.</p>
+data frame. In addition to the model(s) of choice, the user also needs
+the input data frame (here we use the synthetic dataset
+<code>synthetic_df_convergent</code>), and declare their level of
+confidence in the input mixing proportions of data stream 2 via the
+parameter <code>sigma_ln_rho</code>. <code>MixMustR</code> transforms
+the mixing proportions from data stream 2 before running a model, and
+<code>sigma_ln_rho</code> captures the measurement error on the latent
+log-transformed mixing proportion, and in practice can be interpreted as
+the degree of confidence a user has in each element of log-transformed
+mixing proportions from data stream 2.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_mixmustr_models.html">run_mixmustr_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">6</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span>
 <span>  sigma_ln_rho <span class="op">=</span> <span class="fl">0.1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Importantly, MixMustR ingests that confidence at the <em>observation
+and source</em> level. If the user inputs a single numeric value for
+<code>sigma_ln_rho</code> as above, that will be applied across all
+observations in data stream 2. Choosing the appropriate value for the
+uncertainty around data stream 2 is not trivial. Therefore, the
+<code>MixMustR</code> package offers a simple tool which plots the
+expected variability in mixing proportion as a function of an input
+vector of mixing proportions from data stream 2 (one from each source),
+and their respective degrees of confidence or measurement error.
+Although the function does not inform the user what the expected
+uncertainty for each source and observation should be (what has to come
+from expect knowledge), it does allow the user to fine tune
+<code>sigma_ln_rho</code> until the appropriate variability in input
+mixing proportions is achieved. As an example, we show the expected
+variability in mixing proportions that would result from the value of
+0.1 above:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># An observation from input mixing proportion in data stream 2, remove the group</span></span>
+<span><span class="co">#  column.</span></span>
+<span><span class="va">pis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">synthetic_df_convergent</span><span class="op">$</span><span class="va">df_stream_2</span><span class="op">[</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co"># Then for each create a value for their measurement error</span></span>
+<span><span class="va">sigma_ln_rho</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pis</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Visualize the potential parameter resulting from the chosen uncertainty</span></span>
+<span><span class="fu">MixMustR</span><span class="fu">::</span><span class="fu"><a href="../reference/evaluate_uncertainty.html">evaluate_uncertainty</a></span><span class="op">(</span><span class="va">pis</span>, <span class="va">sigma_ln_rho</span><span class="op">)</span><span class="op">$</span><span class="va">plot</span></span></code></pre></div>
+<p align="center">
+<img src="vignette-fig-unnamed-chunk-4-1.png" width="90%"></p>
 <div class="section level4">
 <h4 id="behind-the-scenes">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes"></a>
 </h4>
@@ -239,7 +290,7 @@ each dataset for Stan</li>
 </h3>
 <p>Once a model is fit, you can visualize the performance using the
 built-in plotting tools.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">mus</span> <span class="op">&lt;-</span> <span class="va">tracer_parameters</span><span class="op">$</span><span class="va">mus</span></span>
 <span><span class="fu"><a href="../reference/make_post_prop_long.html">make_post_prop_long</a></span><span class="op">(</span></span>
@@ -254,13 +305,13 @@ built-in plotting tools.</p>
 <span>    subtitle <span class="op">=</span> <span class="st">"Synthetic dataset of high agreement"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p align="center">
-<img src="vignette-fig-unnamed-chunk-3-1.png" width="90%"></p>
+<img src="vignette-fig-unnamed-chunk-5-1.png" width="90%"></p>
 <p>This plot compares observed vs. predicted mixing proportions for data
 stream 2, helping you assess how well the model captures the underlying
 signal. You can also explore how the model estimates compare to the
 stream 2 benchmark using Bayesian R<sup>2</sup> (<a href="http://doi.org/10.1080/00031305.2018.1549100" class="external-link">Gelman <em>et
 al.</em>, 2019</a>):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mixmustr_bayes_R2.html">mixmustr_bayes_R2</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_fits</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">model</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  data_streams_list <span class="op">=</span> <span class="va">synthetic_df_convergent</span>, target <span class="op">=</span> <span class="st">"df_stream_2"</span>,</span>
