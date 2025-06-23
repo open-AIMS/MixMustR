@@ -35,6 +35,7 @@ The \code{scale_fill_jco} function from the \code{ggsci} package is used to appl
 and the \code{scale_shape_manual} function is used to define point shapes.
 }
 \examples{
+library(MixMustR)
 data <- data.frame(
   Observed = c(0.2, 0.4, 0.6, 0.8),
   Predicted = c(0.25, 0.35, 0.65, 0.75),
