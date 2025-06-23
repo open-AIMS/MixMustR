@@ -117,13 +117,17 @@ The current development version can be downloaded from GitHub via
     if (!requireNamespace("remotes")) {
       install.packages("remotes")
     }
+    remotes::install_github("open-aims/MixMustR", ref = "dev")
+
+Otherwise install the stable version via
+
+    if (!requireNamespace("remotes")) {
+      install.packages("remotes")
+    }
     remotes::install_github("open-aims/MixMustR", ref = "main")
 
 Because `MixMustR` is based on [Stan](https://mc-stan.org/), a C++
-compiler is required. The program
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) comes with a
-C++ compiler for Windows. On Mac, you should install Xcode. See the
-prerequisites section on this
+compiler is required. See the prerequisites section on this
 [link](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) for
 further instructions on how to get the compilers running.
 
@@ -131,7 +135,8 @@ further instructions on how to get the compilers running.
 
 See package documentation and [online
 vignettes](https://open-aims.github.io/MixMustR/articles/introduction.html)
-for full explanation of expected structure of input variables.
+for full explanation of expected structure of input variables, as well
+as how to decide on the measurement error/confidence for data stream 2.
 
     library(MixMustR)
     options(mc.cores = parallel::detectCores())
