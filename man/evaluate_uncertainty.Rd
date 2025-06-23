@@ -17,7 +17,7 @@ around \code{pi} on the log scale.}
 \item{iter}{Integer. The number of iterations to run the simulation for.
 Defaults to 10,000.}
 
-\item{seef}{Integer. Seed for simulation reproducibility. Defaults to 10.
+\item{seed}{Integer. Seed for simulation reproducibility. Defaults to 10.
 Defaults to 10.}
 }
 \value{

@@ -82,7 +82,7 @@ plot_multiple_faceted_scatter_avg <- function (data, ...) {
 #' around `pi` on the log scale.
 #' @param iter Integer. The number of iterations to run the simulation for.
 #' Defaults to 10,000.
-#' @param seef Integer. Seed for simulation reproducibility. Defaults to 10.
+#' @param seed Integer. Seed for simulation reproducibility. Defaults to 10.
 #' Defaults to 10.
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object representing the faceted

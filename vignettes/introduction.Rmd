@@ -98,11 +98,11 @@ The core function to run models is `run_mixmustr_models()`. This function allows
 ``` r
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
-  sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
+  sigma_ln_rho = 1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
 )
 ```
 
-Importantly, MixMustR ingests that confidence at the *observation and source* level. If the user inputs a single numeric value for `sigma_ln_rho` as above, that will be applied across all observations in data stream 2. Choosing the appropriate value for the uncertainty around data stream 2 is not trivial. Therefore, the `MixMustR` package offers a simple tool which plots the expected variability in mixing proportion as a function of an input vector of mixing proportions from data stream 2 (one from each source), and their respective degrees of confidence or measurement error. Although the function does not inform the user what the expected uncertainty for each source and observation should be (what has to come from expect knowledge), it does allow the user to fine tune `sigma_ln_rho` until the appropriate variability in input mixing proportions is achieved. As an example, we show the expected variability in mixing proportions that would result from the value of 0.1 above:
+Importantly, MixMustR ingests that confidence at the *observation and source* level. If the user inputs a single numeric value for `sigma_ln_rho` as above, that will be applied across all observations in data stream 2. Choosing the appropriate value for the uncertainty around data stream 2 is not trivial. Therefore, the `MixMustR` package offers a simple tool which plots the expected variability in mixing proportion as a function of an input vector of mixing proportions from data stream 2 (one from each source), and their respective degrees of confidence or measurement error. Although the function does not inform the user what the expected uncertainty for each source and observation should be (what has to come from expect knowledge), it does allow the user to fine tune `sigma_ln_rho` until the appropriate variability in input mixing proportions is achieved. As an example, we show the expected variability in mixing proportions that would result from the value of 1 above:
 
 
 ``` r
@@ -119,6 +119,8 @@ MixMustR::evaluate_uncertainty(pis, sigma_ln_rho)$plot
   <img src="vignette-fig-unnamed-chunk-4-1.png" width = "90%"/>
 </p>
 
+
+So a decent amount of variation is allowed with this value. This could reflect, for example, weak confidence in the mixing proportion observations in data stream 2.
 
 ### Behind the Scenes
 
@@ -168,13 +170,13 @@ mixmustr_bayes_R2(
   order_ref = tracer_parameters$mus$source
 )
 #>              Source mean 2.5%HDI 97.5%HDI
-#> 1        Macroalgae 0.98    0.97     0.99
-#> 2          Mangrove 0.98    0.98     0.99
-#> 3         Saltmarsh 0.99    0.98     0.99
-#> 4          Seagrass 0.97    0.96     0.98
-#> 5              SPOM 0.98    0.97     0.99
-#> 6 Terrestrial grass 0.98    0.97     0.99
-#> 7         Unsampled 0.99    0.98     0.99
+#> 1        Macroalgae 0.57    0.48     0.66
+#> 2          Mangrove 0.61    0.52     0.70
+#> 3         Saltmarsh 0.64    0.60     0.69
+#> 4          Seagrass 0.61    0.57     0.66
+#> 5              SPOM 0.53    0.40     0.67
+#> 6 Terrestrial grass 0.59    0.49     0.68
+#> 7         Unsampled 0.61    0.57     0.66
 ```
 
 ---

@@ -112,11 +112,11 @@ The core function to run models is `run_mixmustr_models()`. This function allows
 ```{r, results = 'hide', message = FALSE, warning = FALSE}
 model_fits <- run_mixmustr_models(
   mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
-  sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
+  sigma_ln_rho = 1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
 )
 ```
 
-Importantly, MixMustR ingests that confidence at the *observation and source* level. If the user inputs a single numeric value for `sigma_ln_rho` as above, that will be applied across all observations in data stream 2. Choosing the appropriate value for the uncertainty around data stream 2 is not trivial. Therefore, the `MixMustR` package offers a simple tool which plots the expected variability in mixing proportion as a function of an input vector of mixing proportions from data stream 2 (one from each source), and their respective degrees of confidence or measurement error. Although the function does not inform the user what the expected uncertainty for each source and observation should be (what has to come from expect knowledge), it does allow the user to fine tune `sigma_ln_rho` until the appropriate variability in input mixing proportions is achieved. As an example, we show the expected variability in mixing proportions that would result from the value of 0.1 above:
+Importantly, MixMustR ingests that confidence at the *observation and source* level. If the user inputs a single numeric value for `sigma_ln_rho` as above, that will be applied across all observations in data stream 2. Choosing the appropriate value for the uncertainty around data stream 2 is not trivial. Therefore, the `MixMustR` package offers a simple tool which plots the expected variability in mixing proportion as a function of an input vector of mixing proportions from data stream 2 (one from each source), and their respective degrees of confidence or measurement error. Although the function does not inform the user what the expected uncertainty for each source and observation should be (what has to come from expect knowledge), it does allow the user to fine tune `sigma_ln_rho` until the appropriate variability in input mixing proportions is achieved. As an example, we show the expected variability in mixing proportions that would result from the value of 1 above:
 
 ```{r fig.width = 7, fig.height = 4, fig.cap = "", dev = "png", dpi = 200}
 # An observation from input mixing proportion in data stream 2, remove the group
@@ -127,6 +127,8 @@ sigma_ln_rho <- rep(1, length(pis))
 # Visualize the potential parameter resulting from the chosen uncertainty
 MixMustR::evaluate_uncertainty(pis, sigma_ln_rho)$plot
 ```
+
+So a decent amount of variation is allowed with this value. This could reflect, for example, weak confidence in the mixing proportion observations in data stream 2.
 
 ### Behind the Scenes
 
