@@ -1,7 +1,7 @@
 ---
 title: "Introduction to MixMustR"
 author: "Diego Barneche and Chris Fulton"
-date: "2025-06-20"
+date: "2025-06-23"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to MixMustR}
@@ -48,6 +48,8 @@ This vignette will walk you through the basic usage of `MixMustR`, covering:
    - Independent observations.
    - Hierarchical grouping structure.
 
+The combination of these three choices is pre-packaged in `MixMustR` via the data frame `mixmustr_models`.
+
 ## Synthetic Datasets in `MixMustR`
 
 The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical, unbalanced ecological field sampling design.
@@ -56,34 +58,41 @@ The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_co
 - **`synthetic_df_divergent`**: Exhibits significant differences in the underlying mixing proportions between data streams 1 and 2.
 
 Each dataset is a list containing three data frames:
-1. **`df_stream_1`**: Simulated mixture data for the first stream, including tracer estimates.
-2. **`df_stream_2`**: Synthetic proportions for the second stream, with a column for each source.
-3. **`stream_1_props`**: Synthetic proportions for the first stream, used for testing purposes.
 
-These datasets were generated using the internal `make_mixture_data` function, which combines stable isotope data (`bcs_si`), fatty acid data (`bcs_fa`), and synthetic proportions. The `truth_stream` parameter specifies the stream used as the "true" source contributions. These datasets are valuable for evaluating the ability of model variants to retrieve underlying mixture proportions, with diagnostic tools available for summary and visualization.
+1. **`df_stream_1`**: Simulated mixture data for the first stream, including tracer estimates. Its size is N observations by K tracers. It also contains an additional column named `group`, which captures the grouping structure of this synthetic dataset. This group column is not mandatory, e.g., in case all observations are independent.
+
+2. **`df_stream_2`**: Synthetic proportions for the second stream, with a column for each source. Its size is N observations by J sources. At the observation/row level, the sum should be constrained between 0 and 1. Like `df_stream_1`, it also contains an additional column named `group`, which captures the grouping structure of this synthetic dataset.
+
+3. **`stream_1_props`**: Synthetic proportions for the first stream. This data frame is not a mandatory requirement to run models in `MixMustR`, it is only exported and used for testing purposes.
+
+These datasets and their underlying simulated synthetic proportions were generated using internal non-exported functions, combining data from stable isotopes (`bcs_si`) and fatty acids (`bcs_fa`). These synthetic datasets are valuable for evaluating the ability of model variants to retrieve underlying mixture proportions, and `MixMustR` offers diagnostic tools available for summary and visualization.
 
 ## Setup
 
 We begin by loading the package and setting options for parallel computing and Stan:
 
 
+
+
 ``` r
 library(MixMustR)
+rstan::rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 ```
 
 ---
 
 ## Step 1: Prepare Tracer Parameters
 
-We'll assume you have access to source tracer summaries—mean (`mus`) and standard deviation (`sigmas`) values for each source. These should be combined into a named list, and `MixMustR` provides an example list called `tracer_parameters`.
+We'll assume you have access to source tracer summaries—mean (`mus`), standard deviation (`sigmas`) and sample size (`ns`) values for each source. These should be combined into a named list, and `MixMustR` provides an example list called `tracer_parameters`.
 
-These are required to inform the model about each source's chemical signature and the variability around it.
+These are required to inform the model about each source's chemical signatures and the variability around them.
 
 ---
 
 ## Step 2: Run the Models
 
-The core function to run models is `run_mixmustr_models()`. This function allows you to run multiple models defined in the built-in `mixmustr_models` data frame.
+The core function to run models is `run_mixmustr_models()`. This function allows you to run multiple models defined in the built-in `mixmustr_models` data frame. In addition to the model(s) of choice, the user also needs the input data frame (here we use the synthetic dataset `synthetic_df_convergent`), and declare their level of confidence in the input mixing proportions of data stream 2 via the parameter `sigma_ln_rho`. `MixMustR` transforms the mixing proportions from data stream 2 before running a model, and `sigma_ln_rho` captures the measurement error on the latent log-transformed mixing proportion, and in practice can be interpreted as the degree of confidence a user has in each element of log-transformed mixing proportions from data stream 2.
 
 
 ``` r
@@ -92,6 +101,24 @@ model_fits <- run_mixmustr_models(
   sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
 )
 ```
+
+Importantly, MixMustR ingests that confidence at the *observation and source* level. If the user inputs a single numeric value for `sigma_ln_rho` as above, that will be applied across all observations in data stream 2. Choosing the appropriate value for the uncertainty around data stream 2 is not trivial. Therefore, the `MixMustR` package offers a simple tool which plots the expected variability in mixing proportion as a function of an input vector of mixing proportions from data stream 2 (one from each source), and their respective degrees of confidence or measurement error. Although the function does not inform the user what the expected uncertainty for each source and observation should be (what has to come from expect knowledge), it does allow the user to fine tune `sigma_ln_rho` until the appropriate variability in input mixing proportions is achieved. As an example, we show the expected variability in mixing proportions that would result from the value of 0.1 above:
+
+
+``` r
+# An observation from input mixing proportion in data stream 2, remove the group
+#  column.
+pis <- unlist(synthetic_df_convergent$df_stream_2[2, -1])
+# Then for each create a value for their measurement error
+sigma_ln_rho <- rep(1, length(pis))
+# Visualize the potential parameter resulting from the chosen uncertainty
+MixMustR::evaluate_uncertainty(pis, sigma_ln_rho)$plot
+```
+
+<p align="center">
+  <img src="vignette-fig-unnamed-chunk-4-1.png" width = "90%"/>
+</p>
+
 
 ### Behind the Scenes
 
@@ -127,7 +154,7 @@ make_post_prop_long(
 ```
 
 <p align="center">
-  <img src="vignette-fig-unnamed-chunk-3-1.png" width = "90%"/>
+  <img src="vignette-fig-unnamed-chunk-5-1.png" width = "90%"/>
 </p>
 
 

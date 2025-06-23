@@ -76,7 +76,8 @@ plot_multiple_faceted_scatter_avg <- function (data, ...) {
 #' proportion given its uncertainty on the log scale.
 #'
 #' @param pi A numeric vector containing mixing proportions
-#' (needs to sum to 1). 
+#' (needs to sum to 1). If named, the function uses the names for plotting
+#' purposes.
 #' @param ln_sigma_rho A numeric vector containing the uncertainty 
 #' around `pi` on the log scale.
 #' @param iter Integer. The number of iterations to run the simulation for.
@@ -129,7 +130,11 @@ evaluate_uncertainty <- function(pi, ln_sigma_rho, iter = 1e4, seed = 10) {
     out[i, ] <- rnorm(length(ln_x), ln_x, ln_sigma_rho) |>
       softmax()
   }
-  colnames(out) <- paste0("Source ", seq_len(ncol(out)))
+  if (is.null(names(pi))) {
+    colnames(out) <- paste0("Source ", seq_len(ncol(out)))
+  } else {
+    colnames(out) <- names(pi)
+  }
   out <- data.frame(out, check.names = FALSE) |>
     pivot_longer(everything(), names_to = "Sources", values_to = "Values")
   plot_out <- ggplot(data = out) +

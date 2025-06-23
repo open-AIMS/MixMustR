@@ -8,7 +8,8 @@ evaluate_uncertainty(pi, ln_sigma_rho, iter = 10000, seed = 10)
 }
 \arguments{
 \item{pi}{A numeric vector containing mixing proportions
-(needs to sum to 1).}
+(needs to sum to 1). If named, the function uses the names for plotting
+purposes.}
 
 \item{ln_sigma_rho}{A numeric vector containing the uncertainty
 around \code{pi} on the log scale.}
