@@ -67,6 +67,10 @@ which would amount to the question mark in the first data stream. Given
 these data, the user can choose among eight model variants based on
 three choices (c—e, see below for more explanations).
 
+The publication describing in full the statistical models in `MixMustR`
+can be found in an [accompanying
+repository](https://github.com/open-aims/MixMustR_paper).
+
 ## Model variants
 
 `MixMustR` currently allows for eight model variants which result from
