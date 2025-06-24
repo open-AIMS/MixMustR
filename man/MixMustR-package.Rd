@@ -36,7 +36,14 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Chritopher J. Fulton \email{c.fulton@aims.gov.au} (\href{https://orcid.org/0000-0002-1140-1999}{ORCID})
+  \item Julie Vercelloni \email{j.vercelloni@aims.gov.au} (\href{https://orcid.org/0000-0001-5227-014X}{ORCID})
+  \item Edgar Santos-Fernández \email{edgar.santosfernandez@qut.edu.au} (\href{https://orcid.org/0000-0001-5962-5417}{ORCID})
+  \item Kay L. Davis \email{ka.davis@aims.gov.au} (\href{https://orcid.org/0000-0002-7223-4303}{ORCID})
+  \item Shaun K. Wilson \email{sk.wilson@aims.gov.au} (\href{https://orcid.org/0000-0002-4590-0948}{ORCID})
+  \item Luke Thomas \email{l.thomas@aims.gov.au}
+  \item James M. McGree \email{james.mcgree@qut.edu.au} (\href{https://orcid.org/0000-0003-2997-8929}{ORCID})
+  \item Kerrie Mengersen \email{k.mengersen@qut.edu.au} (\href{https://orcid.org/0000-0001-8625-9168}{ORCID})
+  \item Christopher J. Fulton \email{c.fulton@aims.gov.au} (\href{https://orcid.org/0000-0002-1140-1999}{ORCID})
 }
 
 }
