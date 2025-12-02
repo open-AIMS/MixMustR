@@ -1,4 +1,4 @@
-// Code built by MixMustR on 2025-06-24 12:33:28.206324
+// Code built by MixMustR on 2025-12-02 04:42:00.513561
 // User options:
 	// sample_tracer = TRUE
 	// fix_unsampled = TRUE
@@ -14,18 +14,18 @@ data {
 	matrix<lower=0>[J, K] s; // sample SDs for each source and tracer
 	matrix<lower=1>[J, K] m; // source- and tracer- specific sample size
 	int<lower=1> R; // number of levels in the hierarchical structure
-	int<lower=1> YR[N]; // dummy vector of random levels
+	array[N] int<lower=1> YR; // dummy vector of random levels
 }
 parameters {
-	vector[J + 1] zeta[N]; // zeta from softmax
-	vector[J + 1] randvec[R]; // random effects
-	real<lower=0> randsd[J + 1]; // random effects hyper parameter
-	real<lower=0> ext_sigma[J + 1]; // residual error, likelihood 2
+	array[N] vector[J + 1] zeta; // zeta from softmax
+	array[R] vector[J + 1] randvec; // random effects
+	array[J + 1] real<lower=0> randsd; // random effects hyper parameter
+	array[J + 1] real<lower=0> ext_sigma; // residual error, likelihood 2
 	matrix[J, K] mu; // mean for each source and tracer (J x K)
 	matrix<lower=0>[J, K] nu; // degrees of freedom
 }
 transformed parameters {
-	simplex[J + 1] p[N]; // probability vector for each site
+	array[N] simplex[J + 1] p; // probability vector for each site
 	matrix[J, K] omega; // SD for each source and tracer
 	for (n in 1:N) {
 		p[n] = softmax(zeta[n]);
@@ -47,7 +47,7 @@ model {
 	// Mixture model
 	for (n in 1:N) {
 		for (k in 1:K) {
-			real phi[J + 1];
+			array[J + 1] real phi;
 			// Contribution from sampled sources
 			for (j in 1:J) {
 				phi[j] = log(p[n][j]) + normal_lpdf(Y[n, k] | mu[j, k], sqrt(p[n][j]^2 * omega[j, k]^2));
