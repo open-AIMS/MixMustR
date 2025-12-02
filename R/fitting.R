@@ -85,17 +85,17 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
   if (hierarchical) {
     script <- c(script,
       "\tint<lower=1> R; // number of levels in the hierarchical structure\n",
-      "\tint<lower=1> YR[N]; // dummy vector of random levels\n"
+      "\tarray[N] int<lower=1> YR; // dummy vector of random levels\n"
     )
   }
   script <- c(script, "}\n", "parameters {\n",
-    "\tvector[J + 1] zeta[N]; // zeta from softmax\n"
+    "\tarray[N] vector[J + 1] zeta; // zeta from softmax\n"
   )
   if (hierarchical) {
     script <- c(script,
-      "\tvector[J + 1] randvec[R]; // random effects\n",
-      "\treal<lower=0> randsd[J + 1]; // random effects hyper parameter\n",
-      "\treal<lower=0> ext_sigma[J + 1]; // residual error, likelihood 2\n"
+      "\tarray[R] vector[J + 1] randvec; // random effects\n",
+      "\tarray[J + 1] real<lower=0> randsd; // random effects hyper parameter\n",
+      "\tarray[J + 1] real<lower=0> ext_sigma; // residual error, likelihood 2\n"
     )
   }
   if (sample_tracer & fix_unsampled) {
@@ -112,16 +112,16 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
   }
   if (!sample_tracer) {
     script <- c(script,
-      "\treal<lower=0> sigma[K]; // residual SDs for each tracer\n"
+      "\tarray[K] real<lower=0> sigma; // residual SDs for each tracer\n"
     )
   }
   if (!sample_tracer & !fix_unsampled) {
     script <- c(script,
-      "\treal sampled_mean_x[K]; // mean unsampled estimate for each tracer\n"
+      "\tarray[K] real sampled_mean_x; // mean unsampled estimate for each tracer\n"
     )
   }
   script <- c(script, "}\n", "transformed parameters {\n",
-    "\tsimplex[J + 1] p[N]; // probability vector for each site\n"
+    "\tarray[N] simplex[J + 1] p; // probability vector for each site\n"
   )
   if (sample_tracer) {
     script <- c(script,
@@ -157,7 +157,7 @@ build_stancode <- function(sample_tracer = FALSE, fix_unsampled = FALSE,
     "\t// Mixture model\n",
     "\tfor (n in 1:N) {\n",
     "\t\tfor (k in 1:K) {\n",
-    "\t\t\treal phi[J + 1];\n",
+    "\t\t\tarray[J + 1] real phi;\n",
     "\t\t\t// Contribution from sampled sources\n",
     "\t\t\tfor (j in 1:J) {\n"
   )
