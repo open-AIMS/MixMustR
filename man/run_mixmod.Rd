@@ -7,8 +7,9 @@
 run_mixmod(model_path, mod_name_suffix, ...)
 }
 \arguments{
-\item{model_path}{A character string specifying the path to the Stan model
-file.}
+\item{model_path}{Optional character scalar retained for compatibility with
+higher-level wrappers. The current wrangling logic does not inspect this
+value.}
 
 \item{mod_name_suffix}{A character string used to create a unique model name.}
 

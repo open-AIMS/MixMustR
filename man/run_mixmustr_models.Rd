@@ -17,22 +17,24 @@ run_mixmustr_models(
 run. Each row should represent a model, with columns indicating the values
 for \code{sample_tracer}, \code{fix_unsampled}, \code{hierarchical}, and \code{code_path}.}
 
-\item{data_streams_list}{A list containing the input
-data streams for the model. It should include two
-data frames named \code{df_stream_1} and\code{df_stream_2}. See
-details for the expected structure of these.}
+\item{data_streams_list}{A named list containing \code{df_stream_1} and
+\code{df_stream_2}. \code{df_stream_1} must contain stream-1 tracer observations with
+one column per tracer and may contain a \code{group} column. \code{df_stream_2} must
+contain one column per sampled source with values interpreted as stream-2
+mixing proportions and may contain a \code{group} column. An \code{Unsampled} column
+is optional; if absent, the unsampled component is reconstructed as
+\verb{1 - rowSums(sampled proportions)}.}
 
-\item{tracer_list}{A named list containing 1--3 data frames of same size,
-one for the mean signatures, one for their standard deviations, and another
-one for sample size. The second data frame is mandatory if \code{sample_tracer}
-is \code{TRUE}, or if \code{fix_unsampled} is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.
-The third data frame is mandatory if \code{sample_tracer} is \code{TRUE}. See details
-for exact structure of these data frames.}
+\item{tracer_list}{A named list containing \code{mus}, \code{sigmas}, and \code{ns}. Each
+element must contain a \code{source} column followed by matching tracer columns.
+\code{mus} supplies sampled-source mean signatures, \code{sigmas} supplies
+sampled-source standard deviations, and \code{ns} supplies sampled-source sample
+sizes.}
 
-\item{sigma_ln_rho}{A numeric value or matrix specifying the confidence
-around the log mixing proportions. If a matrix, it must be of dimensions
-N X J, with N being the number of observations and J being the number of
-sources.}
+\item{sigma_ln_rho}{Numeric scalar, numeric vector, or numeric matrix giving
+uncertainty in stream-2 log proportions. A scalar is recycled to an
+\verb{N x (J + 1)} matrix. A vector must have length \code{J + 1} and is recycled
+across observations. A matrix must have dimensions \verb{N x (J + 1)}.}
 
 \item{...}{Additional arguments passed to \code{\link[rstan]{stan}}, such as
 \code{iter}, \code{chains}, or \code{control}.}

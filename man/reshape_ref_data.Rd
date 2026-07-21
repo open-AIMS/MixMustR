@@ -7,10 +7,13 @@
 reshape_ref_data(data_streams_list, target = "df_stream_2", order_ref)
 }
 \arguments{
-\item{data_streams_list}{A list containing the input
-data streams for the model. It should include two
-data frames named \code{df_stream_1} and\code{df_stream_2}. See
-details for the expected structure of these.}
+\item{data_streams_list}{A named list containing \code{df_stream_1} and
+\code{df_stream_2}. \code{df_stream_1} must contain stream-1 tracer observations with
+one column per tracer and may contain a \code{group} column. \code{df_stream_2} must
+contain one column per sampled source with values interpreted as stream-2
+mixing proportions and may contain a \code{group} column. An \code{Unsampled} column
+is optional; if absent, the unsampled component is reconstructed as
+\verb{1 - rowSums(sampled proportions)}.}
 
 \item{target}{The target element of \code{data_streams_list}, typically
 \code{"df_stream_2"}.}

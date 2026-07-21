@@ -2,150 +2,151 @@
 % Please edit documentation in R/fitting.R
 \name{mixmustr_wrangle_input}
 \alias{mixmustr_wrangle_input}
-\title{Creates the input list for the Stan model}
+\title{Create the Stan data list for a MixMustR model}
 \usage{
 mixmustr_wrangle_input(
   data_streams_list,
   tracer_list,
-  model_path,
+  model_path = NULL,
   sigma_ln_rho,
   sample_tracer,
   fix_unsampled,
   hierarchical,
-  ...
+  unsampled_prior_ridge = 0.1,
+  eps = 1e-12
 )
 }
 \arguments{
-\item{data_streams_list}{A list containing the input
-data streams for the model. It should include two
-data frames named \code{df_stream_1} and\code{df_stream_2}. See
-details for the expected structure of these.}
+\item{data_streams_list}{A named list containing \code{df_stream_1} and
+\code{df_stream_2}. \code{df_stream_1} must contain stream-1 tracer observations with
+one column per tracer and may contain a \code{group} column. \code{df_stream_2} must
+contain one column per sampled source with values interpreted as stream-2
+mixing proportions and may contain a \code{group} column. An \code{Unsampled} column
+is optional; if absent, the unsampled component is reconstructed as
+\verb{1 - rowSums(sampled proportions)}.}
 
-\item{tracer_list}{A named list containing 1--3 data frames of same size,
-one for the mean signatures, one for their standard deviations, and another
-one for sample size. The second data frame is mandatory if \code{sample_tracer}
-is \code{TRUE}, or if \code{fix_unsampled} is \code{FALSE} and \code{sample_tracer} is \code{FALSE}.
-The third data frame is mandatory if \code{sample_tracer} is \code{TRUE}. See details
-for exact structure of these data frames.}
+\item{tracer_list}{A named list containing \code{mus}, \code{sigmas}, and \code{ns}. Each
+element must contain a \code{source} column followed by matching tracer columns.
+\code{mus} supplies sampled-source mean signatures, \code{sigmas} supplies
+sampled-source standard deviations, and \code{ns} supplies sampled-source sample
+sizes.}
 
-\item{model_path}{A character string specifying the path to the Stan model
-file.}
+\item{model_path}{Optional character scalar retained for compatibility with
+higher-level wrappers. The current wrangling logic does not inspect this
+value.}
 
-\item{sigma_ln_rho}{A numeric value or matrix specifying the confidence
-around the log mixing proportions. If a matrix, it must be of dimensions
-N X J, with N being the number of observations and J being the number of
-sources.}
+\item{sigma_ln_rho}{Numeric scalar, numeric vector, or numeric matrix giving
+uncertainty in stream-2 log proportions. A scalar is recycled to an
+\verb{N x (J + 1)} matrix. A vector must have length \code{J + 1} and is recycled
+across observations. A matrix must have dimensions \verb{N x (J + 1)}.}
 
-\item{sample_tracer}{A logical vector, defaults to FALSE.}
+\item{sample_tracer}{Logical. Included for compatibility with model-choice
+wrappers. The returned data list always includes \code{x}, \code{s}, and \code{m} because
+the updated likelihood uses sampled-source process variance and sampled
+signature model variants use standard errors.}
 
-\item{fix_unsampled}{A logical vector, defaults to FALSE.}
+\item{fix_unsampled}{Logical. Should the unsampled-source signature be fixed
+in the Stan model? If \code{FALSE}, covariance-informed unsampled-prior objects
+are appended to the Stan data list. If \code{TRUE}, those objects are omitted.}
 
-\item{hierarchical}{A logical vector, defaults to FALSE.
-Should all observations be treated as independent or should the model include
-a hierarchical grouping structure?}
+\item{hierarchical}{Logical. Should hierarchical group data be included? If
+\code{TRUE}, the returned list includes \code{R} and \code{YR}. If no \code{group} column is
+available, all observations are assigned to a single group.}
 
-\item{...}{Additional unused arguments.}
+\item{unsampled_prior_ridge}{Numeric scalar. Ridge term used when
+constructing the covariance-informed unsampled-source prior. Defaults to
+\code{0.1}.}
+
+\item{eps}{Numeric scalar. Small positive floor applied to stream-2
+proportions before renormalisation and log transformation. Defaults to
+\code{1e-12}.}
 }
 \value{
-A list containing all the data elements necessary to run the Stan
-code contained within \code{model_path}.
+A named list suitable for passing to Stan. The list contains \code{N},
+\code{J}, \code{K}, \code{Y}, \code{x}, \code{s}, \code{m}, \code{ln_rho}, and \code{sigma_ln_rho}. If
+\code{hierarchical = TRUE}, it also contains \code{R} and \code{YR}. If
+\code{fix_unsampled = FALSE}, it additionally contains \code{x_bar_unsampled_prior}
+and \code{L_x_unsampled_prior}. The returned list carries \code{tracer_center} and
+\code{tracer_scale} attributes for downstream back-transformation.
 }
 \description{
-Creates the input list for the Stan model
+\code{mixmustr_wrangle_input()} validates MixMustR input data and converts the two
+data streams and sampled-source tracer summaries into the Stan data list used
+by the updated MixMustR model variants.
 }
 \details{
-The \code{mixmustr_wrangle_input} function prepares the input data for the Stan
-model:
-\itemize{
-\item \code{data_streams_list}: A list containing two data frames:
-\itemize{
-\item \code{df_stream_1}: Contains the observed data. If this is a hierarchical
-dataset, the first column should be named \code{group}, representing the group
-labels, and the remaining columns should contain numeric tracer values.
-\item \code{df_stream_2}: Contains the log mixing proportions. It must have the same
-number of rows (\code{N}) as \code{df_stream_1}. If the design is hierarchical, the
-first column should be named \code{group}, matching the \code{group} column in
-\code{df_stream_1}. The remaining columns (e.g., \code{source1}, \code{source2}, etc.) must
-contain proportions (i.e., row sums up to 1, and no negative values).
-}
-\item \code{tracer_list}: A list containing up to three data frames:
-\item \code{mus}: A data frame containing the mean tracer signatures for each
-source. The first column should be named \code{source}, with source names
-matching those from data_streams_list$df_stream_2. The remaining columns
-should contain numeric tracer values, with names matching those in
-data_streams_list$df_stream_1. This data frame is required across all models
-in \code{MixMustR}.
-\item \code{sigmas}: A data frame containing the standard deviations of tracer
-signatures for each source. The structure must match that of \code{mus}. It
-cannot contain NAs.
-\item \code{ns}: A data frame containing the sample size used to calculate mus and
-sigmas The structure must match that of \code{mus}. It cannot contain NAs.
-\item \code{model_path}: A character string specifying the path to the Stan model
-file.
-\item \code{sigma_ln_rho}: A numeric value or matrix specifying the confidence around
-the log mixing proportions. If a matrix, it must have dimensions \verb{N x (J + 1)}, with N being the number of observations and J being the number of
-sources. The additional J + 1 column represents the unsampled source, making
-the final row sums across the J + 1 columns total 1.
-\item \code{sample_tracer}: Logical. If \code{TRUE}, the model estimates uncertainty
-around sampled source signatures.
-\item \code{fix_unsampled}: Logical. If \code{TRUE}, the model fixes unsampled source signatures to the mean across all sampled sources.
-\item \code{hierarchical}: Logical. If \code{TRUE}, the model includes a hierarchical grouping structure.
-}
+The function enforces consistent tracer and source ordering before building
+the Stan data list. Tracer columns are taken from \code{tracer_list$mus}, excluding
+the \code{source} column, and must be present in \code{df_stream_1}. Sampled-source
+columns are taken from \code{tracer_list$mus$source} and must be present in
+\code{df_stream_2}.
+
+Stream-2 proportions are converted to an \verb{N x (J + 1)} composition by
+appending or reconstructing the unsampled-source component. If \code{df_stream_2}
+contains an \code{Unsampled} column, that column is used. Otherwise the unsampled
+component is reconstructed as \code{1 - rowSums(P_sampled)}. Proportions are
+floored at \code{eps}, renormalised to sum to one, and then transformed with
+\code{log()}. The resulting \code{ln_rho} is therefore compatible with the
+\code{log_softmax()} likelihood generated by \code{\link{build_stancode}}.
+
+Tracer quantities are standardised after the raw Stan data list is assembled.
+Standardisation uses only sampled-source signatures. This avoids using any
+information about the unsampled-source signature that would not be available
+in real applications. For estimated-unsampled models, the unsampled-source
+prior mean and covariance factor are derived from the standardised
+sampled-source signature matrix.
+
+When \code{hierarchical = TRUE}, group indices are taken from \code{df_stream_1$group}
+when available, otherwise from \code{df_stream_2$group} when available. If neither
+stream contains a \code{group} column, all observations are assigned to a single
+group. When \code{hierarchical = FALSE}, no group data are added to the Stan list.
 }
 \examples{
+\dontrun{
+# Hierarchical model with fixed sampled-source means and an estimated
+# unsampled-source signature.
 library(MixMustR)
-
-# Example input data
-synthetic_streams_list <- list(
-  df_stream_1 = data.frame(
-    group = c("A", "A", "B", "B"),
-    tracer1 = c(1.2, 1.3, 2.1, 2.2),
-    tracer2 = c(3.4, 3.5, 4.6, 4.7)
-  ),
-  df_stream_2 = data.frame(
-    group = c("A", "A", "B", "B"),
-    source1 = c(0.6, 0.4, 0.7, 0.3),
-    source2 = c(0.4, 0.6, 0.3, 0.7)
-  )
+sdata <- mixmustr_wrangle_input(
+  data_streams_list = synthetic_df_convergent,
+  tracer_list = tracer_parameters,
+  sigma_ln_rho = 1,
+  sample_tracer = FALSE,
+  fix_unsampled = FALSE,
+  hierarchical = TRUE
 )
 
-synthetic_tracer_list <- list(
-  mus = data.frame(
-    source = c("source1", "source2"),
-    tracer1 = c(1.25, 2.15),
-    tracer2 = c(3.45, 4.65)
-  ),
-  sigmas = data.frame(
-    source = c("source1", "source2"),
-    tracer1 = c(0.05, 0.1),
-    tracer2 = c(0.15, 0.2)
-  ),
-  ns = data.frame(
-    source = c("source1", "source2"),
-    tracer1 = c(5L, 10L), # make sure these are integers
-    tracer2 = c(7L, 9L)
-  )
+names(sdata)
+attr(sdata, "tracer_center")
+attr(sdata, "tracer_scale")
+
+# Non-hierarchical model with sampled-source signatures estimated and the
+# unsampled-source signature fixed to the sampled-source centroid.
+sdata_no_hier <- mixmustr_wrangle_input(
+  data_streams_list = synthetic_df_convergent,
+  tracer_list = tracer_parameters,
+  sigma_ln_rho = 0.5,
+  sample_tracer = TRUE,
+  fix_unsampled = TRUE,
+  hierarchical = FALSE
 )
 
-# Example parameters
-model_path <- tempfile(fileext = ".stan")
-sigma_ln_rho <- 0.01
-sample_tracer <- TRUE
-fix_unsampled <- FALSE
-hierarchical <- TRUE
-
-# Call the function
-input_list <- mixmustr_wrangle_input(
-  data_streams_list = synthetic_streams_list,
-  tracer_list = synthetic_tracer_list,
-  model_path = model_path,
-  sigma_ln_rho = sigma_ln_rho,
-  sample_tracer = sample_tracer,
-  fix_unsampled = fix_unsampled,
-  hierarchical = hierarchical
+# Source-specific stream-2 uncertainty can be supplied as a vector of length
+# J + 1, including the unsampled component.
+sigma_vec <- rep(0.5, length(tracer_parameters$mus$source) + 1)
+sdata_vec <- mixmustr_wrangle_input(
+  data_streams_list = synthetic_df_convergent,
+  tracer_list = tracer_parameters,
+  sigma_ln_rho = sigma_vec,
+  sample_tracer = FALSE,
+  fix_unsampled = FALSE,
+  hierarchical = TRUE
 )
+}
 
 }
 \seealso{
-\code{\link{run_mixmustr_models}}
+\code{\link{build_stancode}},
+\code{\link{run_mixmod}},
+\code{\link{run_mixmustr_models}},
+\code{\link{mixmustr_models}}
 }

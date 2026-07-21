@@ -2,56 +2,128 @@
 % Please edit documentation in R/fitting.R
 \name{build_stancode}
 \alias{build_stancode}
-\title{Builds underlying Stan code for MixMustR model of choice}
+\title{Build Stan code for a MixMustR model variant}
 \usage{
 build_stancode(
-  sample_tracer = FALSE,
-  fix_unsampled = FALSE,
-  hierarchical = FALSE,
-  code_path
+  sample_tracer,
+  fix_unsampled,
+  hierarchical,
+  code_path = NULL,
+  write_file = !is.null(code_path)
 )
 }
 \arguments{
-\item{sample_tracer}{A logical vector, defaults to FALSE.}
+\item{sample_tracer}{Logical. Should sampled-source tracer signatures be
+estimated as latent source means? If \code{TRUE}, the generated Stan code
+includes non-centred sampled-source signature parameters with prior scale
+\code{s / sqrt(m)}. If \code{FALSE}, sampled-source signatures are fixed at the
+user-supplied means.}
 
-\item{fix_unsampled}{A logical vector, defaults to FALSE.}
+\item{fix_unsampled}{Logical. Should the unsampled-source tracer signature be
+fixed? If \code{TRUE}, the generated Stan code fixes the unsampled signature to
+the mean sampled-source signature on the standardised tracer scale. If
+\code{FALSE}, the unsampled signature is estimated with a covariance-informed
+prior derived from sampled-source signatures.}
 
-\item{hierarchical}{A logical vector, defaults to FALSE.
-Should all observations be treated as independent or should the model include
-a hierarchical grouping structure?}
+\item{hierarchical}{Logical. Should the model include a group-level
+hierarchical structure on mixing proportions? If \code{TRUE}, the generated Stan
+program expects \code{R} and \code{YR} in the Stan data list. If \code{FALSE}, observations
+are treated as independent while retaining observation-level variation in
+logits.}
 
-\item{code_path}{A character vector indicating the file path to the}
+\item{code_path}{Optional character scalar. If supplied and \code{write_file} is
+\code{TRUE}, the generated Stan program is written to this path.}
+
+\item{write_file}{Logical. Should the generated Stan program be written to
+\code{code_path}? Defaults to \code{TRUE} when \code{code_path} is supplied and \code{FALSE}
+otherwise.}
 }
 \value{
-Nothing.
+A character scalar containing the generated Stan program. If
+\code{write_file = TRUE}, the same program is also written to \code{code_path} as a
+side effect.
 }
 \description{
-Builds underlying Stan code for MixMustR model of choice
+In this generated Stan program, mixing proportions are represented with a
+which the unsampled source is the reference category. The first data stream
+is modelled with a heteroscedastic tracer likelihood that propagates
+sampled-source process variance and estimates an additional residual tracer
+scale. The second data stream is modelled on the log-composition scale using
+\code{log_softmax()} of the latent logits. Tracer observations and source
+signatures are expected to be standardised by
+\code{\link{mixmustr_wrangle_input}} prior to Stan fitting.
 }
 \details{
-\code{MixMustR} currently allows for eight model variants
-which result from three user-driven binary choices: 1) should the model only
-ingest the mean sampled-source tracer signatures (equivalent to
-"residual-only error" structure of MixSIAR; Stock et al. 2018) or should it
-incorporate their uncertainty based on user-provided mean, variance and
-sample size information (equivalent to "process error" structure of MixSIAR);
-2) should the unsampled-source tracer signatures be fixed at the mean across
-all sampled sources, or should they rather be estimated based on a prior
-informed by the mean and variance across the sampled tracer signatures? and
-3) should all observations be treated as independent or should the model
-include a hierarchical grouping structure?
+\code{build_stancode()} generates the Stan program for one MixMustR model
+variant. The variant is defined by three logical choices: whether to estimate
+sampled-source tracer signatures, whether to fix or estimate the
+unsampled-source tracer signature, and whether to impose a hierarchical
+structure on mixing proportions.
 
-Given these three choices, \code{\link{build_stancode}} saves a stan code
-to an output directory of the users' choosing. Nothing is returned.
+The 2 x 2 x 2 model grid is defined by \code{sample_tracer}, \code{fix_unsampled}, and
+\code{hierarchical}.
+
+For all variants, the generated model uses \code{J} free logits for \code{J} sampled
+sources and fixes the unsampled-source logit to zero. This removes the
+additive non-identifiability of a full \code{J + 1} softmax representation while
+retaining a full \code{J + 1} simplex after applying \code{softmax()}.
+
+The stream-2 likelihood is applied to log probabilities, not to raw logits.
+Internally, the model computes \code{log_softmax(eta)} and compares it with
+\code{ln_rho}, the log-composition matrix produced by
+\code{\link{mixmustr_wrangle_input}}.
+The stream-2 likelihood uses a Student-t distribution with estimated degrees
+of freedom \code{nu_rho} to provide robustness to stream-2 deviations.
+
+The stream-1 likelihood is heteroscedastic. For observation \code{n} and tracer
+\code{k}, the model combines an estimated residual scale, \code{sigma_y[k]}, with the
+sampled-source process-variance contribution implied by source proportions
+and sampled-source standard deviations. The unsampled-source process variance
+is not supplied by users and is therefore absorbed into \code{sigma_y[k]} together
+with residual observation and model error.
+
+When \code{sample_tracer = TRUE}, sampled-source mean signatures are estimated
+with a non-centred parametrisation:
+\code{mu_source[j, k] = x[j, k] + (s[j, k] / sqrt(m[j, k])) * z_source[j, k]}.
+When \code{fix_unsampled = FALSE}, the unsampled-source mean signature is
+estimated as \code{x_bar_unsampled_prior + tau_unsampled * L_x_unsampled_prior * z_unsampled}, where the prior mean and Cholesky factor are constructed from
+sampled-source signatures by \code{\link{mixmustr_wrangle_input}}.
 }
 \examples{
+# Build code for the model variant with fixed sampled-source signatures,
+# estimated unsampled-source signature, and hierarchical mixing proportions.
 library(MixMustR)
-data(mixmustr_models)
+code <- build_stancode(
+  sample_tracer = FALSE,
+  fix_unsampled = FALSE,
+  hierarchical = TRUE
+)
+cat(substr(code, 1, 80))
 
-build_stancode(mixmustr_models$sample_tracer[1],
-               mixmustr_models$fix_unsampled[1],
-               mixmustr_models$hierarchical[1],
-               mixmustr_models$code_path[1])
+# Build and write a non-hierarchical model with sampled-source signatures
+# estimated and the unsampled-source signature fixed.
+stan_file <- tempfile(fileext = ".stan")
+code <- build_stancode(
+  sample_tracer = TRUE,
+  fix_unsampled = TRUE,
+  hierarchical = FALSE,
+  code_path = stan_file
+)
+file.exists(stan_file)
+
+# Generate the complete 2 x 2 x 2 grid of Stan programs without writing
+# files.
+model_grid <- expand.grid(
+  sample_tracer = c(FALSE, TRUE),
+  fix_unsampled = c(FALSE, TRUE),
+  hierarchical = c(FALSE, TRUE)
+)
+stan_codes <- Map(
+  build_stancode,
+  sample_tracer = model_grid$sample_tracer,
+  fix_unsampled = model_grid$fix_unsampled,
+  hierarchical = model_grid$hierarchical
+)
 
 }
 \references{
@@ -60,5 +132,8 @@ Analyzing mixing systems using a new generation of Bayesian tracer mixing
 models. PeerJ, 6:e5096. doi:10.7717/peerj.5096.
 }
 \seealso{
-\code{\link{run_mixmustr_models}}
+\code{\link{mixmustr_wrangle_input}},
+\code{\link{run_mixmod}},
+\code{\link{run_mixmustr_models}},
+\code{\link{mixmustr_models}}
 }

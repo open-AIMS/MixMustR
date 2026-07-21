@@ -13,7 +13,7 @@ Typically produced by function \code{\link{run_mixmustr_models}}.}
 \item{summary}{Should summary statistics be returned
 instead of the raw values? Default is \code{TRUE}.}
 
-\item{...}{Additional unused arguments.}
+\item{...}{Further arguments passed to \code{\link{reshape_ref_data}}.}
 }
 \value{
 If \code{summary = TRUE}, a (J + 1) x 4 matrix is returned
