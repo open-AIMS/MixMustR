@@ -924,7 +924,7 @@ run_mixmustr_models <- function(model_choices, data_streams_list, tracer_list,
     timing <- system.time({
       model <- run_mixmod(model_path, mod_name_suffix_i, data = sdata, ...)
     })
-    models[[i]] <- list(timing = timing, model = model)
+    models[[i]] <- list(timing = timing, model = model, data = sdata)
     names(models)[i] <- mod_name_suffix_i
   }
   models
