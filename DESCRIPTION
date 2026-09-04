@@ -29,7 +29,8 @@ Suggests:
     usethis,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    covr
 VignetteBuilder: knitr
 URL: https://open-AIMS.github.io/MixMustR/
 BugReports: https://github.com/open-AIMS/MixMustR/issues
