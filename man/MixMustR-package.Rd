@@ -14,20 +14,21 @@ incorporating simultaneous likelihood evaluation from two independent data
 streams collected from the mixture of interest: one obtained from chemical
 tracers/biomarkers (i.e., a single tracer measurement per observation, e.g.,
 from stable isotopes and fatty acids), and another yielding source
-composition (e.g., based on eDNA). \code{MixMustR} also allows for the estimation
-of an additional, unsampled source component to partially relax the
-assumption that the mixing proportions from all samples sources should sum
-up to 1. \code{MixMustR} should have wide applicability in ecological studies,
-particularly given the growing usage and availability of multiple tracers
-spanning traditional stable isotopes and eDNA to understand carbon
+composition (e.g., based on eDNA metabarcoding, particle-tracking
+simulations, or other community-composition data). \code{MixMustR} also allows
+for the estimation of an additional, unsampled source component to partially
+relax the assumption that the mixing proportions from all samples sources
+should sum up to 1. \code{MixMustR} should have wide applicability in ecological
+studies, particularly given the growing usage and availability of multiple
+tracers spanning traditional stable isotopes and eDNA to understand carbon
 source-sink dynamics, and a mixture of stables isotope, fatty acids and eDNA
 to unravel trophic interactions.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://open-aims.github.io/MixMustR/}
-  \item Report bugs at \url{https://github.com/open-aims/MixMustR/issues}
+  \item \url{https://open-AIMS.github.io/MixMustR/}
+  \item Report bugs at \url{https://github.com/open-AIMS/MixMustR/issues}
 }
 
 }

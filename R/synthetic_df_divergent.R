@@ -1,4 +1,4 @@
-#' Synthetic Convergent Dataset
+#' Synthetic Divergent Dataset
 #'
 #' This dataset is a synthetic dataset generated to simulate mixture data for testing and validation purposes in the `MixMustR` package. It is anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils stable isotope data (`bcs_si`), fatty acid data (`bcs_fa`), and synthetic mixture proportions. `synthetic_df_divergent` exhibits great difference in the underlying mixing proportions between data streams 1 and 2.
 #'

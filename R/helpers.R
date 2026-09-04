@@ -1,5 +1,10 @@
-#' Calculates unsampled mixing proportions
-#' 
+#' Reshape a data stream into a full source-proportion matrix
+#'
+#' Extracts the sampled-source proportions for `target` from
+#' `data_streams_list`, in the column order given by `order_ref`, and appends
+#' the reconstructed unsampled-source proportion
+#' (`1 - rowSums(sampled proportions)`).
+#'
 #' @inheritParams mixmustr_wrangle_input
 #' @param target The target element of `data_streams_list`, typically
 #' `"df_stream_2"`.
@@ -37,7 +42,7 @@ fix_sum_to_one <- function(x) {
     tested <- new_x[i, j] + to_change[i]
     new_sum <- sum(c(tested, new_x[i, -j]))
     n_ <- 0
-    while (tested < 0 | tested > 1 & new_sum != 1 & n_ <= 50) {
+    while (tested < 0 || tested > 1 && new_sum != 1 && n_ <= 50) {
       n_ <- n_ + 1
       possible <- which(new_x[i, ] >= abs(to_change[i]))
       j <- sample(possible, 1)

@@ -21,6 +21,7 @@ plot_multiple_faceted_scatter_avg(data, ...)
 }
 \value{
 A \code{\link[ggplot2]{ggplot}} object representing the faceted
+scatter plot.
 }
 \description{
 This function creates a faceted scatter plot to compare observed and predicted values, including error bars and visual grouping by variants. It is designed for visualising mixing proportions or similar data with multiple sources. It's mostly used to plot outputs of make_post_prop_long.

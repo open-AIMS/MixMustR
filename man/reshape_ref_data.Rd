@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{reshape_ref_data}
 \alias{reshape_ref_data}
-\title{Calculates unsampled mixing proportions}
+\title{Reshape a data stream into a full source-proportion matrix}
 \usage{
 reshape_ref_data(data_streams_list, target = "df_stream_2", order_ref)
 }
@@ -26,7 +26,10 @@ A matrix of N x (J + 1), with the + 1 representing the
 mixing proportions from the unsampled source(s).
 }
 \description{
-Calculates unsampled mixing proportions
+Extracts the sampled-source proportions for \code{target} from
+\code{data_streams_list}, in the column order given by \code{order_ref}, and appends
+the reconstructed unsampled-source proportion
+(\verb{1 - rowSums(sampled proportions)}).
 }
 \examples{
 library(MixMustR)

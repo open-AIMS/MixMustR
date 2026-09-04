@@ -41,7 +41,8 @@ across observations. A matrix must have dimensions \verb{N x (J + 1)}.}
 }
 \value{
 A list where each element corresponds to a model configuration,
-containing the run time and model output.
+containing the run time (\code{timing}), the fitted Stan model (\code{model}), and
+the standardised Stan data list used to fit it (\code{data}).
 }
 \description{
 Runs a set of MixMustR models in Stan

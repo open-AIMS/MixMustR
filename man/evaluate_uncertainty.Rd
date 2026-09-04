@@ -17,11 +17,12 @@ around \code{pi} on the log scale.}
 \item{iter}{Integer. The number of iterations to run the simulation for.
 Defaults to 10,000.}
 
-\item{seed}{Integer. Seed for simulation reproducibility. Defaults to 10.
-Defaults to 10.}
+\item{seed}{Integer. Seed for simulation reproducibility. Defaults to 10.}
 }
 \value{
-A \code{\link[ggplot2]{ggplot}} object representing the faceted
+A list with two elements: \code{data}, a long-format data frame of the
+simulated mixing-proportion draws used for plotting, and \code{plot}, the
+\code{\link[ggplot2]{ggplot}} object visualising their density by source.
 }
 \description{
 This function plots the expected uncertainty around each input mixing

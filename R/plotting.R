@@ -14,7 +14,7 @@
 #' @param ... Additional arguments passed to the `labs` function for customizing plot labels.
 #'
 #' @return A \code{\link[ggplot2]{ggplot}} object representing the faceted
-# scatter plot.
+#' scatter plot.
 #'
 #' @details
 #' The function generates a scatter plot with error bars for predicted values, points representing 
@@ -83,10 +83,10 @@ plot_multiple_faceted_scatter_avg <- function (data, ...) {
 #' @param iter Integer. The number of iterations to run the simulation for.
 #' Defaults to 10,000.
 #' @param seed Integer. Seed for simulation reproducibility. Defaults to 10.
-#' Defaults to 10.
 #'
-#' @return A \code{\link[ggplot2]{ggplot}} object representing the faceted
-# scatter plot.
+#' @return A list with two elements: `data`, a long-format data frame of the
+#' simulated mixing-proportion draws used for plotting, and `plot`, the
+#' \code{\link[ggplot2]{ggplot}} object visualising their density by source.
 #'
 #' @details
 #' We recognise that choosing the appropriate value for the uncertainty around
@@ -120,7 +120,7 @@ evaluate_uncertainty <- function(pi, ln_sigma_rho, iter = 1e4, seed = 10) {
   if (length(pi) != length(ln_sigma_rho)) {
     stop("Arguments `pi` and `ln_sigma_rho` must have the same length.")
   }
-  if (!is.numeric(pi) | !is.numeric(ln_sigma_rho)) {
+  if (!is.numeric(pi) || !is.numeric(ln_sigma_rho)) {
     stop("Arguments `pi` and `ln_sigma_rho` must be numeric vectors.")
   }
   ln_x <- log(pi)

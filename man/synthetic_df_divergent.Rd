@@ -3,7 +3,7 @@
 \docType{data}
 \name{synthetic_df_divergent}
 \alias{synthetic_df_divergent}
-\title{Synthetic Convergent Dataset}
+\title{Synthetic Divergent Dataset}
 \format{
 A list containing three data frames:
 \describe{
