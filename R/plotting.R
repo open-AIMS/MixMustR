@@ -25,7 +25,7 @@
 #' The `scale_fill_jco` function from the `ggsci` package is used to apply a color palette, 
 #' and the `scale_shape_manual` function is used to define point shapes.
 #'
-#' @importFrom ggplot2 ggplot geom_errorbar aes geom_point scale_shape_manual
+#' @importFrom ggplot2 ggplot geom_errorbarh aes geom_point scale_shape_manual
 #' @importFrom ggplot2 geom_abline labs xlim ylim facet_wrap theme_bw
 #' @importFrom ggsci scale_fill_jco
 #' @importFrom rlang .data
@@ -47,12 +47,11 @@
 #'   \code{\link{make_post_prop_long}}
 #' 
 #' @export
-plot_multiple_faceted_scatter_avg <- function (data, ...) {
+plot_multiple_faceted_scatter_avg <- function(data, ...) {
   ggplot(data = data) +
-    geom_errorbar(
+    geom_errorbarh(
       mapping = aes(y = .data$Observed, xmin = .data$ymin, xmax = .data$ymax),
-      orientation = "y", width = 0, linewidth = 0.2, colour = "grey60",
-      alpha = 0.8
+      height = 0, linewidth = 0.2, colour = "grey60", alpha = 0.8
     ) +
     geom_point(
       mapping = aes(
