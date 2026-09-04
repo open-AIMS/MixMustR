@@ -54,19 +54,19 @@ make_post_prop_long <- function(modfit, mu_tab, data_streams_list, n, ...) {
   pred_mean_hdci <- apply(array_of_draws, 3, function(x) {
     apply(x, 2, mean_hdci) |>
       bind_rows(.id = "N") |>
-      select(!(.data$`.width`:.data$`.interval`))
+      select(!(".width":".interval"))
   }) |>
     bind_rows(.id = "source") |>
     mutate(N = as.integer(.data$N),
            source = .env$ordered_sources[.data$source]) |>
-    rename(Predicted = .data$y)
+    rename(Predicted = "y")
   left_join(
     pred_mean_hdci,
     reshape_ref_data(data_streams_list, order_ref = mu_tab$source, ...) |>
       data.frame(check.names = FALSE) |>
       mutate(N = seq_len(n())) |>
       pivot_longer(
-        cols = !.data$N, names_to = "source", values_to = "Observed"
+        cols = !"N", names_to = "source", values_to = "Observed"
       ), by = c("N", "source")
   ) |>
     mutate(`Variant:` = as.character(.env$n))
@@ -98,7 +98,6 @@ make_post_prop_long <- function(modfit, mu_tab, data_streams_list, n, ...) {
 #' @importFrom dplyr bind_rows select rename mutate across
 #' @importFrom tidyselect where
 #' @importFrom stats var
-#' @importFrom rlang .data
 #' 
 #' @examples
 #' \dontrun{
@@ -141,8 +140,8 @@ mixmustr_bayes_R2 <- function(modfit, summary = TRUE, ...) {
   if (summary) {
     apply(out_r2, 2, mean_hdci) |>
       bind_rows(.id = "Source") |>
-      select(!(.data$`.width`:.data$`.interval`)) |>
-      rename(mean = .data$y, `2.5%HDI` = .data$ymin, `97.5%HDI` = .data$ymax) |>
+      select(!(".width":".interval")) |>
+      rename(mean = "y", `2.5%HDI` = "ymin", `97.5%HDI` = "ymax") |>
       mutate(across(where(is.numeric), ~round(.x, 2)))
   } else {
     out_r2

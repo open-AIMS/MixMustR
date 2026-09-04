@@ -183,12 +183,11 @@ make_unsampled_signature <- function(mus_tab, delta = 3) {
 #'
 #' @importFrom dplyr left_join mutate across bind_rows select relocate
 #' @importFrom tidyselect contains
-#' @importFrom rlang .data
 #' @keywords internal
 #' @noRd
 augment_bcs_with_unsampled <- function(bcs_si, bcs_fa, mus_tab, delta = 3) {
   bcs <- left_join(
-    bcs_si, select(bcs_fa, !c(.data$Study, .data$Taxa)), by = "source"
+    bcs_si, select(bcs_fa, !c("Study", "Taxa")), by = "source"
   ) |>
     mutate(across(contains("SD"), ~1), across(contains("(n)"), ~10L))
   unsmpd <- make_unsampled_signature(mus_tab, delta = delta) |>
@@ -202,15 +201,14 @@ augment_bcs_with_unsampled <- function(bcs_si, bcs_fa, mus_tab, delta = 3) {
   }
   bcs <- bind_rows(bcs, unsmpd)
   list(
-    bcs_si = select(bcs, .data$source:.data$Study),
-    bcs_fa = select(bcs, .data$source, .data$`24:0`:.data$`20:5w3 (n)`,
-                    .data$Study) |>
+    bcs_si = select(bcs, "source":"Study"),
+    bcs_fa = select(bcs, "source", "24:0":"20:5w3 (n)", "Study") |>
       mutate(Taxa = NA) |>
-      relocate(.data$Taxa, .after = "source")
+      relocate("Taxa", .after = "source")
   )
 }
 
-#' @importFrom dplyr bind_rows bind_cols mutate case_match arrange case_match
+#' @importFrom dplyr bind_rows bind_cols mutate recode_values arrange
 #' @importFrom purrr map
 #' @importFrom rlang .data
 #' @noRd
@@ -227,7 +225,7 @@ make_mixture_data <- function(si_df, fa_df, stream_1_props, stream_2_props,
     reshape_isotope_df(si_df), reshape_fattyacids_df(fa_df)
   ) |>
     mutate(
-      a = case_match(.data$tracer, "d(13C/12C)" ~ -Inf, .default = 0), b = Inf
+      a = recode_values(.data$tracer, "d(13C/12C)" ~ -Inf, default = 0), b = Inf
     ) |>
     calc_tracer_estimate(...) |>
     arrange(.data$source, .data$tracer_family, .data$tracer) |> # ensure alphabetical order
@@ -269,33 +267,32 @@ calc_tracer_estimate <- function(x, rand_gen = FALSE, sd_ = NULL, seed = 10) {
 #' @importFrom dplyr left_join select mutate across
 #' @importFrom tidyr pivot_wider
 #' @importFrom tidyselect where
-#' @importFrom rlang .data
 #' @noRd
 wrangle_tracer_pars <- function(raw_data_si, raw_data_fa) {
   mu_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      select(!c(.data$Study, .data$sd, .data$n, .data$tracer_family)) |>
+      select(!c("Study", "sd", "n", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "mean"),
     reshape_fattyacids_df(raw_data_fa) |>
-      select(!c(.data$Study, .data$sd, .data$n, .data$tracer_family)) |>
+      select(!c("Study", "sd", "n", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "mean"),
     by = "source"
   )
   sig_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      select(!c(.data$Study, .data$mean, .data$n, .data$tracer_family)) |>
+      select(!c("Study", "mean", "n", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "sd"),
     reshape_fattyacids_df(raw_data_fa) |>
-      select(!c(.data$Study, .data$mean, .data$n, .data$tracer_family)) |>
+      select(!c("Study", "mean", "n", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "sd"),
     by = "source"
   )
   n_tab <- left_join(
     reshape_isotope_df(raw_data_si) |>
-      select(!c(.data$Study, .data$mean, .data$sd, .data$tracer_family)) |>
+      select(!c("Study", "mean", "sd", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "n"),
     reshape_fattyacids_df(raw_data_fa) |>
-      select(!c(.data$Study, .data$mean, .data$sd, .data$tracer_family)) |>
+      select(!c("Study", "mean", "sd", "tracer_family")) |>
       pivot_wider(names_from = "tracer", values_from = "n"),
     by = "source"
   )
@@ -315,7 +312,7 @@ reshape_isotope_df <- function(x) {
     ) |>
     left_join(
       x |>
-        select(.data$source, ends_with("(SD)"), .data$Study) |>
+        select("source", ends_with("(SD)"), "Study") |>
         pivot_longer(
           cols = ends_with("(SD)"), values_to = "sd", names_to = "tracer"
         ) |>
@@ -324,7 +321,7 @@ reshape_isotope_df <- function(x) {
     ) |>
     left_join(
       x |>
-        select(.data$source, ends_with("(n)"), .data$Study) |>
+        select("source", ends_with("(n)"), "Study") |>
         pivot_longer(
           cols = ends_with("(n)"), values_to = "n", names_to = "tracer"
         ) |>
@@ -341,14 +338,14 @@ reshape_isotope_df <- function(x) {
 #' @noRd
 reshape_fattyacids_df <- function(x) {
   x |>
-    select(-.data$Taxa, -ends_with("(SD)"), -ends_with("(n)")) |>
+    select(-"Taxa", -ends_with("(SD)"), -ends_with("(n)")) |>
     pivot_longer(
-      cols = .data$`24:0`:.data$`20:5w3`, values_to = "mean",
+      cols = "24:0":"20:5w3", values_to = "mean",
       names_to = "tracer"
     ) |>
     left_join(
       x |>
-        select(.data$source, ends_with("(SD)"), .data$Study) |>
+        select("source", ends_with("(SD)"), "Study") |>
         pivot_longer(
           cols = ends_with("(SD)"), values_to = "sd", names_to = "tracer"
         ) |>
@@ -357,7 +354,7 @@ reshape_fattyacids_df <- function(x) {
     ) |>
     left_join(
       x |>
-        select(.data$source, ends_with("(n)"), .data$Study) |>
+        select("source", ends_with("(n)"), "Study") |>
         pivot_longer(
           cols = ends_with("(n)"), values_to = "n", names_to = "tracer"
         ) |>
@@ -414,13 +411,13 @@ compare_mixing_proportions <- function(synth_list_d, synth_list_c, mu_tab) {
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
+        pivot_longer(!"N", names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
         synth_list_d, target = "df_stream_2", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!.data$N, names_to = "source", values_to = "eDNA"),
+        pivot_longer(!"N", names_to = "source", values_to = "eDNA"),
       by = c("N", "source")
     ) |>
       mutate(`dataset` = "Disagreement (Dataset 2)"),
@@ -430,13 +427,13 @@ compare_mixing_proportions <- function(synth_list_d, synth_list_c, mu_tab) {
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!.data$N, names_to = "source", values_to = "Tracers"),
+        pivot_longer(!"N", names_to = "source", values_to = "Tracers"),
       reshape_ref_data(
         synth_list_c, target = "df_stream_2", order_ref = mu_tab$source
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!.data$N, names_to = "source", values_to = "eDNA"),
+        pivot_longer(!"N", names_to = "source", values_to = "eDNA"),
       by = c("N", "source")
     ) |>
       mutate(`dataset` = "Agreement (Dataset 1)")
