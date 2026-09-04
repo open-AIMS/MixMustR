@@ -6,7 +6,7 @@
 
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
-[![R-CMD-check](https://github.com/open-aims/MixMustR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/open-aims/MixMustR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/open-AIMS/MixMustR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/open-AIMS/MixMustR/actions/workflows/R-CMD-check.yaml)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
 [![Ask Us Anything
 !](https://img.shields.io/badge/Ask%20us-anything-1abc9c.svg)](https://github.com/open-AIMS/MixMustR/issues/new)
@@ -23,14 +23,15 @@ by incorporating simultaneous likelihood evaluation from two independent
 data streams collected from the mixture of interest (Fig. 1a–b): one
 obtained from chemical tracers/biomarkers (i.e., a single tracer
 measurement per observation, e.g., from stable isotopes and fatty
-acids), and another yielding source composition (e.g., based on eDNA).
-`MixMustR` also allows for the estimation of an additional, unsampled
-source component to partially relax the assumption that the mixing
-proportions from all samples sources should sum up to 1. `MixMustR`
-should have wide applicability in ecological studies, particularly given
-the growing usage and availability of multiple tracers spanning
-traditional stable isotopes and eDNA to understand carbon source-sink
-dynamics ([Reef *et al.*
+acids), and another yielding source composition (e.g., based on eDNA
+metabarcoding, particle-tracking simulations, or other
+community-composition data). `MixMustR` also allows for the estimation
+of an additional, unsampled source component to partially relax the
+assumption that the mixing proportions from all samples sources should
+sum up to 1. `MixMustR` should have wide applicability in ecological
+studies, particularly given the growing usage and availability of
+multiple tracers spanning traditional stable isotopes and eDNA to
+understand carbon source-sink dynamics ([Reef *et al.*
 2018](https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lno.10499),
 [Ortega *et al.*
 2020](https://aslopubs.onlinelibrary.wiley.com/doi/10.1002/lno.11579),
@@ -69,7 +70,7 @@ three choices (c—e, see below for more explanations).
 
 The publication describing in full the statistical models in `MixMustR`
 can be found in an [accompanying
-repository](https://github.com/open-aims/MixMustR_paper).
+repository](https://github.com/open-AIMS/MixMustR_paper).
 
 ## Model variants
 
@@ -78,14 +79,15 @@ three user-driven binary choices: 1) should the model only ingest the
 mean sampled-source tracer signatures (equivalent to “residual-only
 error” structure of the widely-used
 [MixSIAR](https://github.com/brianstock/MixSIAR)) or should it
-incorporate their uncertainty based on user-provided mean, variance and
-sample size information (equivalent to “process error” structure of
-MixSIAR, Fig. 1c); 2) should the unsampled-source tracer signatures be
-fixed at the mean across all sampled sources, or should they rather be
-estimated based on a prior informed by the mean and variance across the
-sampled tracer signatures? (Fig. 1d) and 3) should all observations be
-treated as independent or should the model include a hierarchical
-grouping structure? (Fig. 1e).
+incorporate their uncertainty based on user-provided mean, standard
+deviation and sample size information (equivalent to “process error”
+structure of MixSIAR, Fig. 1c); 2) should the unsampled-source tracer
+signatures be fixed at the mean across all sampled sources, or should
+they rather be estimated jointly across tracers using a
+covariance-informed prior derived from the sampled-source tracer
+signatures? (Fig. 1d) and 3) should all observations be treated as
+independent or should the model include a hierarchical grouping
+structure? (Fig. 1e).
 
 ## Synthetic datasets
 
@@ -93,12 +95,12 @@ grouping structure? (Fig. 1e).
 `synthetic_df_convergent` and `synthetic_df_divergent`. Both are
 anchored to empirical values of stable isotopes and fatty acids for a
 range of plant carbon sources in marine soils. They are hierarchical in
-structure and simulate an unbalanced design (identical between both
-datasets) that would be typical of an ecological field sampling design.
-They differ in their discrepancy between the underlying mixing
-proportions between data streams 1 and 2, with `synthetic_df_convergent`
-exhibiting little difference, whereas `synthetic_df_divergent` exhibits
-larger difference:
+structure, simulating 100 mixture observations arranged in 10 groups of
+10 (identical between both datasets), following the factorial simulation
+design described in the accompanying manuscript. They differ in their
+discrepancy between the underlying mixing proportions between data
+streams 1 and 2, with `synthetic_df_convergent` exhibiting little
+difference, whereas `synthetic_df_divergent` exhibits larger difference:
 
     library(MixMustR)
     mus <- tracer_parameters$mus
@@ -121,14 +123,14 @@ The current development version can be downloaded from GitHub via
     if (!requireNamespace("remotes")) {
       install.packages("remotes")
     }
-    remotes::install_github("open-aims/MixMustR", ref = "dev")
+    remotes::install_github("open-AIMS/MixMustR", ref = "dev")
 
 Otherwise install the stable version via
 
     if (!requireNamespace("remotes")) {
       install.packages("remotes")
     }
-    remotes::install_github("open-aims/MixMustR", ref = "main")
+    remotes::install_github("open-AIMS/MixMustR", ref = "main")
 
 Because `MixMustR` is based on [Stan](https://mc-stan.org/), a C++
 compiler is required. See the prerequisites section on this
@@ -138,7 +140,7 @@ further instructions on how to get the compilers running.
 ## Usage
 
 See package documentation and [online
-vignettes](https://open-aims.github.io/MixMustR/articles/introduction.html)
+vignettes](https://open-AIMS.github.io/MixMustR/articles/introduction.html)
 for full explanation of expected structure of input variables, as well
 as how to decide on the measurement error/confidence for data stream 2.
 
