@@ -26,4 +26,5 @@ README.Rmd
 ^tests/local$
 ^article$
 ^article*
-^vignette/*.orig$
+^vignettes/*.orig$
+^vignettes/stan$
