@@ -1,63 +1,213 @@
+#' Simulate a hierarchical logistic-normal source composition
+#'
+#' `simulate_mvn_mixture()` simulates an `N = G * M` composition of `J` source
+#' categories using a two-level hierarchical logistic-normal process:
+#' group-level centres in unconstrained (multivariate normal) space, and
+#' observation-level draws around each group centre, both mapped to the
+#' simplex with `softmax()`. This mirrors the composition-generating process
+#' used for the MixMustR simulation study (see the accompanying manuscript).
+#'
+#' @param G Integer. Number of groups.
+#' @param M Integer. Number of observations simulated within each group.
+#' @param J Integer. Number of source categories (including any pooled
+#'   unsampled category), i.e. the dimension of the composition.
+#' @param noise Numeric scalar. Within-group variance in unconstrained
+#'   (pre-softmax) space; larger values yield more dispersed, less
+#'   group-consistent compositions. Defaults to `0.5`.
+#' @param seed Integer. Seed used for both the group-centre draws and the
+#'   within-group observation draws. Defaults to `1`.
+#'
+#' @return A list with two elements: `dataset`, a data frame with columns
+#'   `group` and `Source_1, ..., Source_J` containing the `N x J` simulated
+#'   proportions (rows sum to 1), and `group_means`, the group-level average
+#'   of `dataset` for each source.
+#'
+#' @details
+#' Group centres are drawn as `rnorm(G * J, mean = 0, sd = 2)` in
+#' unconstrained space. Observations within a group are then drawn from a
+#' multivariate normal distribution centred on that group's centre with
+#' covariance `diag(J) * noise`, and mapped to the simplex with `softmax()`.
+#'
+#' @importFrom MASS mvrnorm
+#' @importFrom stats rnorm aggregate
+#' @keywords internal
 #' @noRd
-vary_x <- function(x, yes, ...) {
-  if (yes) {
-    unsampled_diff <- make_fractionation_mat(x, ...)
-    out <- x + unsampled_diff
-    out[, "Unsampled"] <- rowSums(unsampled_diff)
-    out <- t(apply(out, 1, function(x) {
-      x <- linear_rescale(x, c(0, 1))
-      abs(x) / sum(abs(x))
-    }))
-    out[, -which(colnames(out) == "Unsampled")]
-  } else {
-    x
+simulate_mvn_mixture <- function(G, M, J, noise = 0.5, seed = 1) {
+  softmax <- function(x) {
+    exp(x) / sum(exp(x))
   }
+  set.seed(seed)
+  group_means_unconstrained <- matrix(
+    rnorm(G * J, mean = 0, sd = 2), nrow = G, ncol = J
+  )
+  sigma <- diag(J) * noise
+  results_list <- vector(mode = "list", length = G)
+  for (g in seq_len(G)) {
+    unconstrained_data <- mvrnorm(
+      n = M, mu = group_means_unconstrained[g, ], Sigma = sigma
+    )
+    proportions_data <- t(apply(unconstrained_data, 1, softmax))
+    results_list[[g]] <- cbind(data.frame(group = rep(g, M)), proportions_data)
+  }
+  full_dataset <- do.call(rbind, results_list)
+  colnames(full_dataset)[2:(J + 1)] <- paste0("Source_", seq_len(J))
+  full_dataset$group <- factor(full_dataset$group)
+  group_means_table <- aggregate(. ~ group, data = full_dataset, FUN = mean)
+  list(dataset = full_dataset, group_means = group_means_table)
 }
 
-#' @importFrom stats runif
+#' Rename generic source columns to real source names
+#'
+#' `rename_sources()` renames the `Source_1, ..., Source_J` columns produced
+#' by `simulate_mvn_mixture()` to the source names supplied in
+#' `source_names`, matched by the numeric suffix of each `Source_N` column.
+#'
+#' @param df A data frame containing one or more `Source_N` columns, typically
+#'   the `dataset` element returned by `simulate_mvn_mixture()`.
+#' @param source_names A character vector of replacement names, one per
+#'   `Source_N` column, in the same order (`Source_1` first, and so on).
+#'
+#' @return `df` with its `Source_N` columns renamed to `source_names`.
+#'
+#' @importFrom dplyr rename all_of
+#' @importFrom stats setNames
+#' @keywords internal
 #' @noRd
-make_fractionation_mat <- function(x, delta = -0.05) {
-  delta <- abs(delta)
-  matrix(runif(nrow(x) * ncol(x), -1 * delta, delta), nrow(x), ncol(x))
+rename_sources <- function(df, source_names) {
+  source_cols <- grep("^Source_[0-9]+$", names(df), value = TRUE)
+  source_cols <- source_cols[
+    order(as.integer(sub("^Source_", "", source_cols)))
+  ]
+  if (length(source_names) != length(source_cols)) {
+    stop(
+      "Length of `source_names` must match the number of Source_N columns.\n",
+      "Got ", length(source_names), " source names but found ",
+      length(source_cols), " Source_N columns: ",
+      paste(source_cols, collapse = ", ")
+    )
+  }
+  rename_map <- setNames(source_cols, source_names)
+  rename(df, all_of(rename_map))
 }
 
+#' Strip the pooled-unsampled column from simulated proportion data
+#'
+#' `rm_unsampled()` removes the `Unsampled` proportion column from the
+#' `df_stream_2` and `stream_1_props` elements of a simulated mixture-data
+#' list, mimicking the realistic situation in which users do not supply the
+#' unsampled-source proportion directly; \code{\link{mixmustr_wrangle_input}}
+#' reconstructs it as `1 - rowSums(sampled proportions)`.
+#'
+#' @param x A list with `df_stream_1`, `df_stream_2`, and `stream_1_props`
+#'   elements, typically produced by `make_mixture_data()`.
+#'
+#' @return `x`, with the `Unsampled` column removed from `df_stream_2` and
+#'   `stream_1_props`.
+#'
+#' @importFrom dplyr select
+#' @keywords internal
 #' @noRd
-#' @importFrom dplyr group_by count ungroup mutate bind_rows
-#' @importFrom gtools rdirichlet
-#' @importFrom tibble as_tibble
-#' @importFrom rlang .env .data
-produce_mix_props <- function(data, sources, seed_1, seed_2,
-                              make_unsampled = TRUE, ...) {
-  group_n <- data |>
-    group_by(.data$group) |>
-    count() |>
-    ungroup()
-  n_groups <- nrow(group_n)
-  alphas <- c(1, 1.5, 2, 2.5, 0.5, 2.5) # each value represents a source
-  if (length(sources) != length(alphas)) {
-    stop("Number of Dirichlet concentration parameters not the same as number",
-         " of sources.")
+rm_unsampled <- function(x) {
+  x$df_stream_2 <- select(x$df_stream_2, -"Unsampled")
+  x$stream_1_props <- select(x$stream_1_props, -"Unsampled")
+  x
+}
+
+#' Construct an out-of-hull unsampled-source tracer signature
+#'
+#' `make_unsampled_signature()` builds a synthetic tracer signature for a
+#' pooled unsampled source, positioned `delta` scaled units away from the
+#' sampled-source centroid along the leading principal-component direction of
+#' the standardised sampled-source signatures. This reproduces the simulation
+#' design used to test MixMustR's ability to recover a source whose signature
+#' does not overlap the sampled-source multivariate space (see the
+#' accompanying manuscript).
+#'
+#' @param mus_tab A data frame of sampled-source mean tracer signatures, with
+#'   a `source` column followed by one numeric column per tracer, e.g.
+#'   `tracer_parameters$mus`.
+#' @param delta Numeric scalar. Number of scaled units to displace the
+#'   unsampled signature from the sampled-source centroid along the first
+#'   principal component. Defaults to `3`.
+#'
+#' @return A one-row tibble with a `source` column (`"Unsampled"`) followed by
+#'   the same tracer columns as `mus_tab`, on the original (unstandardised)
+#'   tracer scale.
+#'
+#' @importFrom tibble column_to_rownames as_tibble_row
+#' @importFrom dplyr mutate
+#' @importFrom stats prcomp
+#' @keywords internal
+#' @noRd
+make_unsampled_signature <- function(mus_tab, delta = 3) {
+  s <- column_to_rownames(mus_tab, "source") |> as.matrix()
+  s_scaled <- scale(s)
+  center_tracer <- attr(s_scaled, "scaled:center")
+  scale_tracer <- attr(s_scaled, "scaled:scale")
+  # Direction of strongest source separation in scaled tracer space.
+  pc <- prcomp(s_scaled, center = FALSE, scale. = FALSE)
+  u_scaled <- colMeans(s_scaled) + delta * pc$rotation[, 1]
+  u_original <- u_scaled * scale_tracer + center_tracer
+  as_tibble_row(as.list(u_original)) |>
+    mutate(source = "Unsampled", .before = 1)
+}
+
+#' Append a simulated unsampled-source row to the tracer signature tables
+#'
+#' `augment_bcs_with_unsampled()` combines `bcs_si` and `bcs_fa`, homogenises
+#' all standard-deviation and sample-size columns to the values used in the
+#' MixMustR simulation study (`1` and `10`, respectively), and appends a
+#' pooled-unsampled row built by `make_unsampled_signature()`. The result is
+#' split back into `bcs_si`- and `bcs_fa`-shaped tables ready to be passed to
+#' `make_mixture_data()`.
+#'
+#' @param bcs_si A data frame of sampled-source stable-isotope signatures,
+#'   structured as \code{\link{bcs_si}}.
+#' @param bcs_fa A data frame of sampled-source fatty-acid signatures,
+#'   structured as \code{\link{bcs_fa}}.
+#' @param mus_tab A data frame of sampled-source mean tracer signatures used
+#'   to position the unsampled signature, e.g. `tracer_parameters$mus`.
+#' @param delta Numeric scalar passed to `make_unsampled_signature()`.
+#'   Defaults to `3`.
+#'
+#' @return A list with two elements, `bcs_si` and `bcs_fa`, matching the
+#'   structure of the package's `bcs_si`/`bcs_fa` datasets but with an
+#'   additional `"Unsampled"` row and homogenised SD/n columns throughout.
+#'
+#' @details
+#' Homogenising the process SD (`1`) and sample size (`10`) across all
+#' sources and tracers isolates the effect of the other simulation-design
+#' factors (number of tracers, number of sources, stream agreement, etc.) on
+#' recovery of the mixing proportions, matching the factorial simulation
+#' experiment described in the accompanying manuscript.
+#'
+#' @importFrom dplyr left_join mutate across bind_rows select relocate
+#' @importFrom tidyselect contains
+#' @importFrom rlang .data
+#' @keywords internal
+#' @noRd
+augment_bcs_with_unsampled <- function(bcs_si, bcs_fa, mus_tab, delta = 3) {
+  bcs <- left_join(
+    bcs_si, select(bcs_fa, !c(.data$Study, .data$Taxa)), by = "source"
+  ) |>
+    mutate(across(contains("SD"), ~1), across(contains("(n)"), ~10L))
+  unsmpd <- make_unsampled_signature(mus_tab, delta = delta) |>
+    mutate(Study = "Simulated")
+  # SD/n are set directly to the homogenised values above; deriving them from
+  # `bcs` (as in the original simulation script) would return the same
+  # constants because `bcs` was already homogenised.
+  for (trc in setdiff(names(mus_tab), "source")) {
+    unsmpd[[paste0(trc, " (SD)")]] <- 1
+    unsmpd[[paste0(trc, " (n)")]] <- 10L
   }
-  set.seed(seed_1)
-  x <- rdirichlet(n = n_groups, alpha = alphas) |>
-    round(3) |>
-    fix_sum_to_one()
-  set.seed(seed_2)
-  out <- list()
-  for (i in seq_len(nrow(group_n))) {
-    out[[i]] <- rdirichlet(n = group_n$n[i], alpha = x[i, ] * 10) |>
-      round(3) |>
-      fix_sum_to_one() |>
-      data.frame() |>
-      as_tibble() |>
-      mutate(group = .env$group_n$group[i])
-  }
-  out <- bind_rows(out)
-  names(out)[seq_along(alphas)] <- sources
-  if (make_unsampled) {
-    out[, sources] <- vary_x(out[, sources], yes = TRUE, ...)
-  }
-  out[, order(names(out))] # ensure alphabetical order of names
+  bcs <- bind_rows(bcs, unsmpd)
+  list(
+    bcs_si = select(bcs, .data$source:.data$Study),
+    bcs_fa = select(bcs, .data$source, .data$`24:0`:.data$`20:5w3 (n)`,
+                    .data$Study) |>
+      mutate(Taxa = NA) |>
+      relocate(.data$Taxa, .after = "source")
+  )
 }
 
 #' @importFrom dplyr bind_rows bind_cols mutate case_match arrange case_match

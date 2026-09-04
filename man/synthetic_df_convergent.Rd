@@ -16,10 +16,11 @@ used for testing purposes}
 }
 }
 \source{
-The synthetic dataset was generated programmatically using the \code{MixMustR} package. The input data sources are:
+The synthetic dataset was generated programmatically using the \code{MixMustR} package, following the simulation design described in the accompanying manuscript. The input data sources are:
 \itemize{
 \item Stable isotope data: See \code{bcs_si} documentation.
 \item Fatty acid data: See \code{bcs_fa} documentation.
+\item Pooled-unsampled tracer signature: synthetically constructed, offset from the sampled-source centroid (see \code{make_unsampled_signature}).
 }
 }
 \usage{
@@ -29,7 +30,7 @@ synthetic_df_convergent
 This dataset is a synthetic dataset generated to simulate mixture data for testing and validation purposes in the \code{MixMustR} package. It is anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils stable isotope data (\code{bcs_si}), fatty acid data (\code{bcs_fa}), and synthetic mixture proportions. \code{synthetic_df_convergent} exhibits little difference in the underlying mixing proportions between data streams 1 and 2.
 }
 \details{
-The dataset was generated using the non-exported \code{make_mixture_data} function, which combines stable isotope data (\code{bcs_si}), fatty acid data (\code{bcs_fa}), and synthetic proportions (\code{stream_1_props} and \code{stream_2_props}) to produce simulated mixture data. The \code{truth_stream} parameter determines which stream's proportions are used as the "true" source contributions.
+The non-exported \code{augment_bcs_with_unsampled} function first combines stable isotope data (\code{bcs_si}) and fatty acid data (\code{bcs_fa}), homogenises their sampled-source SD/sample-size columns, and appends a synthetic pooled-unsampled tracer signature (built by the non-exported \code{make_unsampled_signature} function) positioned away from the sampled-source multivariate space. The non-exported \code{simulate_mvn_mixture} function then generates the two composition streams (\code{stream_1_props} and \code{df_stream_2}) using a hierarchical logistic-normal process across 10 groups of 10 observations. The non-exported \code{make_mixture_data} function combines these signatures and proportions to produce the simulated tracer measurements in \code{df_stream_1}; the \code{truth_stream} parameter determines which stream's proportions are used as the "true" source contributions. Finally, the non-exported \code{rm_unsampled} function removes the explicit \code{Unsampled} proportion column from \code{df_stream_2} and \code{stream_1_props}, mimicking the realistic situation in which users do not supply it directly; \code{\link{mixmustr_wrangle_input}} reconstructs it internally.
 }
 \examples{
 library(MixMustR)

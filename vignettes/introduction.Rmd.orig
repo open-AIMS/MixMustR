@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 `MixMustR` is a flexible Bayesian mixture model package written in the probabilistic programming language [Stan](https://mc-stan.org/) for [R](https://www.r-project.org/). It estimates source mixing proportions by incorporating simultaneous likelihood evaluation from two independent data streams collected from the mixture of interest:
 
 1. **Chemical tracers/biomarkers** (e.g., stable isotopes, fatty acids).
-2. **Source composition** (e.g., based on eDNA or metabarcoding).
+2. **Source composition** (e.g., based on eDNA metabarcoding, particle-tracking simulations, or other community-composition data).
 
 `MixMustR` also allows for the estimation of an additional, unsampled source component to partially relax the assumption that the mixing proportions from all sampled sources should sum to 1. This makes it particularly useful in ecological studies, such as understanding carbon source-sink dynamics or trophic interactions.
 
@@ -56,7 +56,7 @@ This vignette will walk you through the basic usage of `MixMustR`, covering:
 
 2. **Unsampled-source tracer signatures**:
    - Fixed at the mean across sampled sources.
-   - Estimated using a prior informed by sampled tracer signatures.
+   - Estimated jointly across tracers using a covariance-informed prior derived from the sampled-source tracer signatures.
 
 3. **Observation independence**:
    - Independent observations.
@@ -66,7 +66,7 @@ The combination of these three choices is pre-packaged in `MixMustR` via the dat
 
 ## Synthetic Datasets in `MixMustR`
 
-The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical, unbalanced ecological field sampling design.
+The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical design of 100 mixture observations arranged in 10 groups of 10, following the factorial simulation design described in the accompanying manuscript.
 
 - **`synthetic_df_convergent`**: Exhibits minimal differences in the underlying mixing proportions between data streams 1 and 2.
 - **`synthetic_df_divergent`**: Exhibits significant differences in the underlying mixing proportions between data streams 1 and 2.
@@ -111,8 +111,8 @@ The core function to run models is `run_mixmustr_models()`. This function allows
 
 ```{r, results = 'hide', message = FALSE, warning = FALSE}
 model_fits <- run_mixmustr_models(
-  mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
-  sigma_ln_rho = 1, iter = 1e4, warmup = 5e3, chains = 4, cores = 1
+  mixmustr_models[8, ], synthetic_df_convergent, tracer_parameters,
+  sigma_ln_rho = 1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
 )
 ```
 
@@ -209,4 +209,5 @@ If you want more control, you can use `mixmustr_wrangle_input()` directly to pre
 ## References
 
 * Stock, B. C., Semmens, B. X. (2016). MixSIAR GUI User Manual. [https://github.com/brianstock/MixSIAR](https://github.com/brianstock/MixSIAR)
+* Barneche, D. R. *et al.* MixMustR: a data-integrative Bayesian approach to tracer-based ecological mixing problems with an unsampled-source component. Manuscript describing the statistical models in full detail. [https://github.com/open-AIMS/mixmustr_paper](https://github.com/open-AIMS/mixmustr_paper)
 

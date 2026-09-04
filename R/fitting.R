@@ -577,28 +577,6 @@ standardisation_wrapper <- function(sdata, fix_unsampled,
   sdata
 }
 
-
-#' @noRd
-check_sigma_ln_rho <- function(x, ref) {
-  er <- paste0("Parameter `sigma_ln_rho` needs to be either a single numeric",
-               " value or a matrix of ", nrow(ref), " rows and ", ncol(ref),
-                " columns, and cannot contain NA values.")
-  if (is.matrix(x) && is.numeric(x)) {
-    if (!all(dim(x) == dim(ref))) {
-      stop(er)
-    }
-    if (sum(is.na(x)) > 0) {
-      stop(er)
-    }
-  } else if (is.vector(x) && is.numeric(x)) {
-    if (length(x) != 1) {
-       stop(er)
-    }
-  } else {
-    stop(er)
-  }
-}
-
 #' @noRd
 check_sd_tabs <- function(to_eval, mus, param = "SDs") {
   fct_eval <- if (param == "SDs") is.numeric else if (param == "ns") is.integer

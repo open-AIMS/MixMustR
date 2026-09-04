@@ -17,13 +17,14 @@ Imports:
     ggdist,
     tidyr,
     tools,
-    gtools,
     tibble,
     ggsci,
     ggplot2,
     truncnorm,
     tidyselect,
-    rlang
+    rlang,
+    MASS,
+    stats
 Suggests:
     usethis,
     knitr,

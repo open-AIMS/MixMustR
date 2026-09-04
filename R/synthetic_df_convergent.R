@@ -12,13 +12,14 @@
 #' used for testing purposes}
 #' }
 #' @details
-#' The dataset was generated using the non-exported `make_mixture_data` function, which combines stable isotope data (`bcs_si`), fatty acid data (`bcs_fa`), and synthetic proportions (`stream_1_props` and `stream_2_props`) to produce simulated mixture data. The `truth_stream` parameter determines which stream's proportions are used as the "true" source contributions.
+#' The non-exported `augment_bcs_with_unsampled` function first combines stable isotope data (`bcs_si`) and fatty acid data (`bcs_fa`), homogenises their sampled-source SD/sample-size columns, and appends a synthetic pooled-unsampled tracer signature (built by the non-exported `make_unsampled_signature` function) positioned away from the sampled-source multivariate space. The non-exported `simulate_mvn_mixture` function then generates the two composition streams (`stream_1_props` and `df_stream_2`) using a hierarchical logistic-normal process across 10 groups of 10 observations. The non-exported `make_mixture_data` function combines these signatures and proportions to produce the simulated tracer measurements in `df_stream_1`; the `truth_stream` parameter determines which stream's proportions are used as the "true" source contributions. Finally, the non-exported `rm_unsampled` function removes the explicit `Unsampled` proportion column from `df_stream_2` and `stream_1_props`, mimicking the realistic situation in which users do not supply it directly; \code{\link{mixmustr_wrangle_input}} reconstructs it internally.
 #'
 #' @source
-#' The synthetic dataset was generated programmatically using the `MixMustR` package. The input data sources are:
+#' The synthetic dataset was generated programmatically using the `MixMustR` package, following the simulation design described in the accompanying manuscript. The input data sources are:
 #'
 #' - Stable isotope data: See `bcs_si` documentation.
 #' - Fatty acid data: See `bcs_fa` documentation.
+#' - Pooled-unsampled tracer signature: synthetically constructed, offset from the sampled-source centroid (see `make_unsampled_signature`).
 #'
 #' @seealso
 #'   \code{\link{synthetic_df_divergent}}
