@@ -18,7 +18,7 @@ proportion given its uncertainty on the log scale."><meta property="og:image" co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MixMustR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -36,8 +36,11 @@ proportion given its uncertainty on the log scale."><meta property="og:image" co
       <a href="../articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/open-aims/MixMustR/" class="external-link">
+  <a href="https://github.com/open-AIMS/MixMustR/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
 
   </a>
@@ -52,7 +55,7 @@ proportion given its uncertainty on the log scale."><meta property="og:image" co
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Visually inspect uncertainty for input mixing proportion</h1>
-    <small class="dont-index">Source: <a href="https://github.com/open-aims/MixMustR/blob/main/R/plotting.R" class="external-link"><code>R/plotting.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/open-AIMS/MixMustR/blob/main/R/plotting.R" class="external-link"><code>R/plotting.R</code></a></small>
     <div class="hidden name"><code>evaluate_uncertainty.Rd</code></div>
     </div>
 
@@ -86,13 +89,14 @@ Defaults to 10,000.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Integer. Seed for simulation reproducibility. Defaults to 10.
-Defaults to 10.</p></dd>
+<dd><p>Integer. Seed for simulation reproducibility. Defaults to 10.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></code> object representing the faceted</p>
+    <p>A list with two elements: <code>data</code>, a long-format data frame of the
+simulated mixing-proportion draws used for plotting, and <code>plot</code>, the
+<code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></code> object visualising their density by source.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -129,7 +133,7 @@ mixing proportions is achieved.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>

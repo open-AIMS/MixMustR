@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MixMustR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -53,10 +53,13 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/open-aims/MixMustR/" class="external-link">
+  <a href="https://github.com/open-AIMS/MixMustR/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
 
   </a>
@@ -78,9 +81,9 @@
                         <h4 data-toc-skip class="author">Diego Barneche
 and Chris Fulton</h4>
             
-            <h4 data-toc-skip class="date">2025-06-23</h4>
+            <h4 data-toc-skip class="date">2026-09-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/open-aims/MixMustR/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/open-AIMS/MixMustR/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
 
     </div>
@@ -99,8 +102,9 @@ independent data streams collected from the mixture of interest:</p>
 <strong>Chemical tracers/biomarkers</strong> (e.g., stable isotopes,
 fatty acids).</li>
 <li>
-<strong>Source composition</strong> (e.g., based on eDNA or
-metabarcoding).</li>
+<strong>Source composition</strong> (e.g., based on eDNA
+metabarcoding, particle-tracking simulations, or other
+community-composition data).</li>
 </ol>
 <p><code>MixMustR</code> also allows for the estimation of an
 additional, unsampled source component to partially relax the assumption
@@ -135,7 +139,8 @@ user-driven binary choices:</p>
 <strong>Unsampled-source tracer signatures</strong>:
 <ul>
 <li>Fixed at the mean across sampled sources.</li>
-<li>Estimated using a prior informed by sampled tracer signatures.</li>
+<li>Estimated jointly across tracers using a covariance-informed prior
+derived from the sampled-source tracer signatures.</li>
 </ul>
 </li>
 <li>
@@ -158,8 +163,9 @@ datasets, <code>synthetic_df_convergent</code> and
 <code>synthetic_df_divergent</code>, designed for testing and validation
 purposes. Both datasets are anchored to empirical values of stable
 isotopes and fatty acids from plant carbon sources in marine soils and
-simulate a hierarchical, unbalanced ecological field sampling
-design.</p>
+simulate a hierarchical design of 100 mixture observations arranged in
+10 groups of 10, following the factorial simulation design described in
+the accompanying manuscript.</p>
 <ul>
 <li>
 <strong><code>synthetic_df_convergent</code></strong>: Exhibits
@@ -203,7 +209,7 @@ for summary and visualization.</p>
 <p>We begin by loading the package and setting options for parallel
 computing and Stan:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-aims.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-AIMS.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span>
 <span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/rstan_options.html" class="external-link">rstan_options</a></span><span class="op">(</span>auto_write <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <hr>
@@ -238,8 +244,8 @@ the degree of confidence a user has in each element of log-transformed
 mixing proportions from data stream 2.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_mixmustr_models.html">run_mixmustr_models</a></span><span class="op">(</span></span>
-<span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">6</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span>
-<span>  sigma_ln_rho <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">8</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span>
+<span>  sigma_ln_rho <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Importantly, MixMustR ingests that confidence at the <em>observation
 and source</em> level. If the user inputs a single numeric value for
@@ -321,13 +327,13 @@ al.</em>, 2019</a>):</p>
 <span>  order_ref <span class="op">=</span> <span class="va">tracer_parameters</span><span class="op">$</span><span class="va">mus</span><span class="op">$</span><span class="va">source</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;              Source mean 2.5%HDI 97.5%HDI</span></span>
-<span><span class="co">#&gt; 1        Macroalgae 0.57    0.48     0.66</span></span>
-<span><span class="co">#&gt; 2          Mangrove 0.61    0.52     0.70</span></span>
-<span><span class="co">#&gt; 3         Saltmarsh 0.64    0.60     0.69</span></span>
-<span><span class="co">#&gt; 4          Seagrass 0.61    0.57     0.66</span></span>
-<span><span class="co">#&gt; 5              SPOM 0.53    0.40     0.67</span></span>
-<span><span class="co">#&gt; 6 Terrestrial grass 0.59    0.49     0.68</span></span>
-<span><span class="co">#&gt; 7         Unsampled 0.61    0.57     0.66</span></span></code></pre></div>
+<span><span class="co">#&gt; 1        Macroalgae 0.90    0.86     0.94</span></span>
+<span><span class="co">#&gt; 2          Mangrove 0.95    0.93     0.97</span></span>
+<span><span class="co">#&gt; 3         Saltmarsh 0.31    0.15     0.48</span></span>
+<span><span class="co">#&gt; 4          Seagrass 0.87    0.83     0.92</span></span>
+<span><span class="co">#&gt; 5              SPOM 0.98    0.98     0.99</span></span>
+<span><span class="co">#&gt; 6 Terrestrial grass 0.88    0.84     0.92</span></span>
+<span><span class="co">#&gt; 7         Unsampled 0.87    0.84     0.90</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
@@ -391,6 +397,11 @@ outside the wrapper functions.</p>
 <ul>
 <li>Stock, B. C., Semmens, B. X. (2016). MixSIAR GUI User Manual. <a href="https://github.com/brianstock/MixSIAR" class="external-link">https://github.com/brianstock/MixSIAR</a>
 </li>
+<li>Barneche, D. R. <em>et al.</em> MixMustR: a data-integrative
+Bayesian approach to tracer-based ecological mixing problems with an
+unsampled-source component. Manuscript describing the statistical models
+in full detail. <a href="https://github.com/open-AIMS/mixmustr_paper" class="external-link">https://github.com/open-AIMS/mixmustr_paper</a>
+</li>
 </ul>
 </div>
 </div>
@@ -411,7 +422,7 @@ outside the wrapper functions.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer>

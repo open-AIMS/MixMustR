@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MixMustR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -35,8 +35,11 @@
       <a href="../articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/open-aims/MixMustR/" class="external-link">
+  <a href="https://github.com/open-AIMS/MixMustR/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
 
   </a>
@@ -51,7 +54,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Runs a set of MixMustR models in Stan</h1>
-    <small class="dont-index">Source: <a href="https://github.com/open-aims/MixMustR/blob/main/R/fitting.R" class="external-link"><code>R/fitting.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/open-AIMS/MixMustR/blob/main/R/fitting.R" class="external-link"><code>R/fitting.R</code></a></small>
     <div class="hidden name"><code>run_mixmustr_models.Rd</code></div>
     </div>
 
@@ -80,26 +83,28 @@ for <code>sample_tracer</code>, <code>fix_unsampled</code>, <code>hierarchical</
 
 
 <dt id="arg-data-streams-list">data_streams_list<a class="anchor" aria-label="anchor" href="#arg-data-streams-list"></a></dt>
-<dd><p>A list containing the input
-data streams for the model. It should include two
-data frames named <code>df_stream_1</code> and<code>df_stream_2</code>. See
-details for the expected structure of these.</p></dd>
+<dd><p>A named list containing <code>df_stream_1</code> and
+<code>df_stream_2</code>. <code>df_stream_1</code> must contain stream-1 tracer observations with
+one column per tracer and may contain a <code>group</code> column. <code>df_stream_2</code> must
+contain one column per sampled source with values interpreted as stream-2
+mixing proportions and may contain a <code>group</code> column. An <code>Unsampled</code> column
+is optional; if absent, the unsampled component is reconstructed as
+<code>1 - rowSums(sampled proportions)</code>.</p></dd>
 
 
 <dt id="arg-tracer-list">tracer_list<a class="anchor" aria-label="anchor" href="#arg-tracer-list"></a></dt>
-<dd><p>A named list containing 1–3 data frames of same size,
-one for the mean signatures, one for their standard deviations, and another
-one for sample size. The second data frame is mandatory if <code>sample_tracer</code>
-is <code>TRUE</code>, or if <code>fix_unsampled</code> is <code>FALSE</code> and <code>sample_tracer</code> is <code>FALSE</code>.
-The third data frame is mandatory if <code>sample_tracer</code> is <code>TRUE</code>. See details
-for exact structure of these data frames.</p></dd>
+<dd><p>A named list containing <code>mus</code>, <code>sigmas</code>, and <code>ns</code>. Each
+element must contain a <code>source</code> column followed by matching tracer columns.
+<code>mus</code> supplies sampled-source mean signatures, <code>sigmas</code> supplies
+sampled-source standard deviations, and <code>ns</code> supplies sampled-source sample
+sizes.</p></dd>
 
 
 <dt id="arg-sigma-ln-rho">sigma_ln_rho<a class="anchor" aria-label="anchor" href="#arg-sigma-ln-rho"></a></dt>
-<dd><p>A numeric value or matrix specifying the confidence
-around the log mixing proportions. If a matrix, it must be of dimensions
-N X J, with N being the number of observations and J being the number of
-sources.</p></dd>
+<dd><p>Numeric scalar, numeric vector, or numeric matrix giving
+uncertainty in stream-2 log proportions. A scalar is recycled to an
+<code>N x (J + 1)</code> matrix. A vector must have length <code>J + 1</code> and is recycled
+across observations. A matrix must have dimensions <code>N x (J + 1)</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -110,7 +115,8 @@ sources.</p></dd>
     <div id="value">
     <h2>Value</h2>
     <p>A list where each element corresponds to a model configuration,
-containing the run time and model output.</p>
+containing the run time (<code>timing</code>), the fitted Stan model (<code>model</code>), and
+the standardised Stan data list used to fit it (<code>data</code>).</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -131,7 +137,7 @@ containing all of the potential allowed models <code><a href="mixmustr_models.ht
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-aims.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-AIMS.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># mixmustr_models[6, ] runs quickest</span></span></span>
 <span class="r-in"><span><span class="va">model_fits</span> <span class="op">&lt;-</span> <span class="fu">run_mixmustr_models</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">6</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span></span>
@@ -153,7 +159,7 @@ containing all of the potential allowed models <code><a href="mixmustr_models.ht
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
       </footer></div>
