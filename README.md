@@ -7,6 +7,8 @@
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![R-CMD-check](https://github.com/open-AIMS/MixMustR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/open-AIMS/MixMustR/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/open-AIMS/MixMustR/graph/badge.svg)](https://app.codecov.io/gh/open-AIMS/MixMustR)
 [![license](https://img.shields.io/badge/license-MIT%20+%20file%20LICENSE-lightgrey.svg)](https://choosealicense.com/)
 [![Ask Us Anything
 !](https://img.shields.io/badge/Ask%20us-anything-1abc9c.svg)](https://github.com/open-AIMS/MixMustR/issues/new)
