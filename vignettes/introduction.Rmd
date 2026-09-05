@@ -1,7 +1,7 @@
 ---
 title: "Introduction to MixMustR"
 author: "Diego Barneche and Chris Fulton"
-date: "2026-09-04"
+date: "2026-09-05"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to MixMustR}
@@ -149,7 +149,7 @@ make_post_prop_long(
   plot_multiple_faceted_scatter_avg() +
   theme(legend.position = "none") +
   labs(
-    y = "Observed (simulated) from eDNA (data stream 2)",
+    y = "Observed (simulated) from composition data (data stream 2)",
     title = "Model fit performance mixing proportions",
     subtitle = "Synthetic dataset of high agreement"
   )

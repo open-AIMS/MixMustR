@@ -156,7 +156,7 @@ make_post_prop_long(
   plot_multiple_faceted_scatter_avg() +
   theme(legend.position = "none") +
   labs(
-    y = "Observed (simulated) from eDNA (data stream 2)",
+    y = "Observed (simulated) from composition data (data stream 2)",
     title = "Model fit performance mixing proportions",
     subtitle = "Synthetic dataset of high agreement"
   )

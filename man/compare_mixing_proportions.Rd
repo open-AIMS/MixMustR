@@ -20,7 +20,7 @@ A \code{\link[ggplot2]{ggplot}} object visualizing the comparison of mixing prop
 }
 \description{
 This function generates a plot to compare the mixing proportions between two data streams
-(e.g., chemical tracers and eDNA) for synthetic datasets with agreement and disagreement.
+(e.g., chemical tracers and community composition data) for synthetic datasets with agreement and disagreement.
 }
 \details{
 The function compares the mixing proportions from two data streams (\code{stream_1_props} and \code{df_stream_2})

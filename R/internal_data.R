@@ -367,7 +367,7 @@ reshape_fattyacids_df <- function(x) {
 #' Compare Mixing Proportions Between Data Streams
 #'
 #' This function generates a plot to compare the mixing proportions between two data streams 
-#' (e.g., chemical tracers and eDNA) for synthetic datasets with agreement and disagreement.
+#' (e.g., chemical tracers and community composition data) for synthetic datasets with agreement and disagreement.
 #'
 #' @param synth_list_d A list representing the synthetic dataset with divergent mixing proportions.
 #' @param synth_list_c A list representing the synthetic dataset with convergent mixing proportions.
@@ -417,7 +417,7 @@ compare_mixing_proportions <- function(synth_list_d, synth_list_c, mu_tab) {
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!"N", names_to = "source", values_to = "eDNA"),
+        pivot_longer(!"N", names_to = "source", values_to = "Composition"),
       by = c("N", "source")
     ) |>
       mutate(`dataset` = "Disagreement (Dataset 2)"),
@@ -433,21 +433,21 @@ compare_mixing_proportions <- function(synth_list_d, synth_list_c, mu_tab) {
       ) |>
         data.frame(check.names = FALSE) |>
         mutate(N = seq_len(n())) |>
-        pivot_longer(!"N", names_to = "source", values_to = "eDNA"),
+        pivot_longer(!"N", names_to = "source", values_to = "Composition"),
       by = c("N", "source")
     ) |>
       mutate(`dataset` = "Agreement (Dataset 1)")
   ) |>
     ggplot(data = _) +
       geom_point(
-        mapping = aes(x = .data$Tracers, y = .data$eDNA, fill = .data$dataset,
-                      shape = .data$dataset), size = 2, alpha = 0.5
+        mapping = aes(x = .data$Tracers, y = .data$Composition,
+        fill = .data$dataset, shape = .data$dataset), size = 2, alpha = 0.5
       ) +
       geom_abline(slope = 1, linetype = 2) +
       scale_fill_manual(values = c("dodgerblue3", "tomato3")) +
       scale_shape_manual(values = 21:22) +
       labs(x = "From chemical tracers (data stream 1)",
-           y = "From eDNA (data stream 2)",
+           y = "From composition data (data stream 2)",
            title = "Simulated mixing proportions",
            fill = "Matrices in:", shape = "Matrices in:") +
       xlim(c(0, 1)) +
