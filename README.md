@@ -62,13 +62,14 @@ bubble. However, there is a possibility that at least one additional
 source (the question mark) is not comprised in the *J* set of sources.
 b) The second stream (yellow panel) is yielded by community composition
 datasets which can be transformed to mixing proportions, such as those
-obtained via eDNA or metabarcoding techniques. This stream of
-information can reveal mixture sources beyond the original *J* sources
-considered by researchers, and `MixMustR` leverages that information by
-combining those additional sources into one single *unsampled* source,
-which would amount to the question mark in the first data stream. Given
-these data, the user can choose among eight model variants based on
-three choices (c—e, see below for more explanations).
+obtained via particle-tracking simulations or eDNA metabarcoding
+techniques. This stream of information can reveal mixture sources beyond
+the original *J* sources considered by researchers, and `MixMustR`
+leverages that information by combining those additional sources into
+one single *unsampled* source, which would amount to the question mark
+in the first data stream. Given these data, the user can choose among
+eight model variants based on three choices (c—e, see below for more
+explanations).
 
 The publication describing in full the statistical models in `MixMustR`
 can be found in an [accompanying
@@ -149,18 +150,21 @@ as how to decide on the measurement error/confidence for data stream 2.
     library(MixMustR)
     options(mc.cores = parallel::detectCores())
     rstan::rstan_options(auto_write = TRUE)
-    # As an example, we pick mixmustr_models[6, ] because it runs quickest. It is
-    # non-hierarchical and does not estimate (un)sampled tracer signatures.
+    # As an example, we pick mixmustr_models[8, ] because it runs quicker. It is
+    # non-hierarchical and does not estimate the sampled tracer signatures,
+    # though it does estimate the unsampled signature. `sigma_ln_rho = 1` is a
+    # conservative choice that places weak confidence in the estimates of data
+    # stream 2.
     model_fits <- run_mixmustr_models(
-      mixmustr_models[6, ], synthetic_df_convergent, tracer_parameters,
-      sigma_ln_rho = 0.1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
+      mixmustr_models[8, ], synthetic_df_convergent, tracer_parameters,
+      sigma_ln_rho = 1, iter = 1e4, warmup = 5e3, chains = 4, cores = 4
     )
     # then visualise a particular output
     make_post_prop_long(model_fits[[1]]$model, tracer_parameters$mus,
                         synthetic_df_convergent, target = "df_stream_2", n = 1) |>
       plot_multiple_faceted_scatter_avg() +
       theme(legend.position = "none") +
-      labs(y = "Observed (simulated) from eDNA (data stream 2)",
+      labs(y = "Observed (simulated) from composition data (data stream 2)",
            title = "Model fit performance mixing proportions",
            subtitle = "Synthetic dataset of high agreement")
 
