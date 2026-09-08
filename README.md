@@ -60,17 +60,18 @@ abundance evidence that can reveal contributions beyond the *J* sampled
 sources; these are pooled into the same unsampled-source category,
 yielding an *N* × (*J* + 1) structure whose proportions sum to one per
 sample. Given these streams, users choose among eight model variants
-defined by three binary choices: sampled-source signatures fixed or
-estimated with propagated uncertainty; the pooled unsampled-source
-signature fixed at the sampled-source mean or estimated via a
-covariance-informed prior; independent or hierarchical (grouped) source
-proportions. Icons from the [Noun Project](https://thenounproject.com)
-(all [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en)):
-fatty acid by Template, DNA by BomSymbols, stable isotope by Lars
-Meiertoberens, plankton by Tamrin, terrestrial grass by Luis Prado,
-seaweed by mangunkarsa. Icons from
-[PhyloPic](https://www.phylopic.org/): gastropod shell by Tauana Cunha
-([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.en)),
+defined by three binary choices: **c)** sampled-source signatures fixed
+or estimated with propagated uncertainty; **d)** the pooled
+unsampled-source signature fixed at the sampled-source mean or estimated
+via a covariance-informed prior; **e)** independent or hierarchical
+(grouped) source proportions. Icons from the [Noun
+Project](https://thenounproject.com) (all [CC BY
+3.0](https://creativecommons.org/licenses/by/3.0/deed.en)): fatty acid
+by Template, DNA by BomSymbols, stable isotope by Lars Meiertoberens,
+plankton by Tamrin, terrestrial grass by Luis Prado, seaweed by
+mangunkarsa. Icons from [PhyloPic](https://www.phylopic.org/): gastropod
+shell by Tauana Cunha ([CC0
+1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.en)),
 amphipod by T. Michael Keesey ([CC BY-SA
 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en)). All other
 icons by the authors.
