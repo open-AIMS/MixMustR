@@ -24,7 +24,7 @@ vignette: >
   <img src="../man/figures/diagram.png" width = 800/>
 </p>
 
-**Figure 1:** `MixMustR` input data and framework.
+**Figure 1:** `MixMustR` input data and framework. Icons from the [Noun Project](https://thenounproject.com) (all [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en)): fatty acid by Template, DNA by BomSymbols, stable isotope by Lars Meiertoberens, plankton by Tamrin, terrestrial grass by Luis Prado, seaweed by mangunkarsa. Icons from [PhyloPic](https://www.phylopic.org/): gastropod shell by Tauana Cunha ([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.en)), amphipod by T. Michael Keesey ([CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en)). All other icons by the authors.
 
 This vignette will walk you through the basic usage of `MixMustR`, covering:
 
