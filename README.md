@@ -49,27 +49,31 @@ trophic interactions (e.g., [Nielsen *et al.*
 <img src="man/figures/diagram.png" width = 800/>
 </p>
 
-**Figure 1:** `MixMustR` input data and framework. `MixMustR` relies on
-two independent data streams that are collected from the same *N*
-samples. a) the first stream (blue panel) is characterised by the
-canonical chemical tracer/biomarker (e.g., stable isotope, fatty acid)
-dataset, whereby a mixture measurement is obtained for every
-*k*<sup>th</sup> tracer and *n*<sup>th</sup> observation. The original
-sources of such mixtures are unknown, and based on domain knowledge
-researchers often assume that they come from *J* likely sources—here
-represented by hypothetical autotrophic carbon sources within the dashed
-bubble. However, there is a possibility that at least one additional
-source (the question mark) is not comprised in the *J* set of sources.
-b) The second stream (yellow panel) is yielded by community composition
-datasets which can be transformed to mixing proportions, such as those
-obtained via particle-tracking simulations or eDNA metabarcoding
-techniques. This stream of information can reveal mixture sources beyond
-the original *J* sources considered by researchers, and `MixMustR`
-leverages that information by combining those additional sources into
-one single *unsampled* source, which would amount to the question mark
-in the first data stream. Given these data, the user can choose among
-eight model variants based on three choices (c—e, see below for more
-explanations).
+**Figure 1:** **`MixMustR` input data streams and modelling framework.**
+MixMustR integrates two complementary data streams from the same *N*
+mixture samples, linked through shared latent source proportions. **a)**
+Data stream 1 comprises quantitative measurements of *K* chemical
+tracers or biomarkers (e.g., stable isotopes, fatty acids) as an
+*N* × *K* matrix; each mixture may include at least *J* underlying
+sampled sources. **b)** Data stream 2 provides compositional or
+abundance evidence that can reveal contributions beyond the *J* sampled
+sources; these are pooled into the same unsampled-source category,
+yielding an *N* × (*J* + 1) structure whose proportions sum to one per
+sample. Given these streams, users choose among eight model variants
+defined by three binary choices: sampled-source signatures fixed or
+estimated with propagated uncertainty; the pooled unsampled-source
+signature fixed at the sampled-source mean or estimated via a
+covariance-informed prior; independent or hierarchical (grouped) source
+proportions. Icons from the [Noun Project](https://thenounproject.com)
+(all [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en)):
+fatty acid by Template, DNA by BomSymbols, stable isotope by Lars
+Meiertoberens, plankton by Tamrin, terrestrial grass by Luis Prado,
+seaweed by mangunkarsa. Icons from
+[PhyloPic](https://www.phylopic.org/): gastropod shell by Tauana Cunha
+([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.en)),
+amphipod by T. Michael Keesey ([CC BY-SA
+3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en)). All other
+icons by the authors.
 
 The publication describing in full the statistical models in `MixMustR`
 can be found in an [accompanying
