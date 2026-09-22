@@ -55,6 +55,7 @@ The publication describing in full the statistical models in `MixMustR` can be f
 
 ```{r eval=FALSE}
 library(MixMustR)
+library(ggplot2)
 mus <- tracer_parameters$mus
 compare_mixing_proportions(synthetic_df_divergent, synthetic_df_convergent, mus)
 ```
@@ -95,11 +96,19 @@ for further instructions on how to get the compilers running.
 
 See package documentation and [online vignettes](https://open-AIMS.github.io/MixMustR/articles/introduction.html) for full explanation of expected structure of input variables, as well as how to decide on the measurement error/confidence for data stream 2.
 
+```{r eval=TRUE}
+library(MixMustR)
+# As an example, we pick `mixmustr_models[8, ]`. To see all variants, simply
+# type
+mixmustr_models
+```
+
 ```{r eval=FALSE}
 library(MixMustR)
+library(ggplot2)
 options(mc.cores = parallel::detectCores())
 rstan::rstan_options(auto_write = TRUE)
-# As an example, we pick mixmustr_models[8, ] because it runs quicker. It is
+# `mixmustr_models[8, ]` because it runs quicker. It is
 # non-hierarchical and does not estimate the sampled tracer signatures,
 # though it does estimate the unsampled signature. `sigma_ln_rho = 1` is a
 # conservative choice that places weak confidence in the estimates of data
