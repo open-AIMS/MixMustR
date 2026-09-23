@@ -81,7 +81,7 @@
                         <h4 data-toc-skip class="author">Diego Barneche
 and Chris Fulton</h4>
             
-            <h4 data-toc-skip class="date">2026-09-05</h4>
+            <h4 data-toc-skip class="date">2026-09-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/open-AIMS/MixMustR/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="hidden name"><code>introduction.Rmd</code></div>
@@ -161,6 +161,10 @@ derived from the sampled-source tracer signatures.</li>
 <p>The combination of these three choices is pre-packaged in
 <code>MixMustR</code> via the data frame
 <code>mixmustr_models</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mixmustr_models</span></span>
+<span><span class="co">#&gt; Error:</span></span>
+<span><span class="co">#&gt; ! object 'mixmustr_models' not found</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="synthetic-datasets-in-mixmustr">Synthetic Datasets in <code>MixMustR</code><a class="anchor" aria-label="anchor" href="#synthetic-datasets-in-mixmustr"></a>
@@ -215,7 +219,7 @@ for summary and visualization.</p>
 </h3>
 <p>We begin by loading the package and setting options for parallel
 computing and Stan:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://open-AIMS.github.io/MixMustR/" class="external-link">MixMustR</a></span><span class="op">)</span></span>
 <span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/rstan_options.html" class="external-link">rstan_options</a></span><span class="op">(</span>auto_write <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -249,7 +253,7 @@ the mixing proportions from data stream 2 before running a model, and
 log-transformed mixing proportion, and in practice can be interpreted as
 the degree of confidence a user has in each element of log-transformed
 mixing proportions from data stream 2.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_mixmustr_models.html">run_mixmustr_models</a></span><span class="op">(</span></span>
 <span>  <span class="va">mixmustr_models</span><span class="op">[</span><span class="fl">8</span>, <span class="op">]</span>, <span class="va">synthetic_df_convergent</span>, <span class="va">tracer_parameters</span>,</span>
 <span>  sigma_ln_rho <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">1e4</span>, warmup <span class="op">=</span> <span class="fl">5e3</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span></span>
@@ -270,7 +274,7 @@ from expect knowledge), it does allow the user to fine tune
 mixing proportions is achieved. As an example, we show the expected
 variability in mixing proportions that would result from the value of 1
 above:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># An observation from input mixing proportion in data stream 2, remove the group</span></span>
 <span><span class="co">#  column.</span></span>
 <span><span class="va">pis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">synthetic_df_convergent</span><span class="op">$</span><span class="va">df_stream_2</span><span class="op">[</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -306,7 +310,7 @@ each dataset for Stan</li>
 </h3>
 <p>Once a model is fit, you can visualize the performance using the
 built-in plotting tools.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">mus</span> <span class="op">&lt;-</span> <span class="va">tracer_parameters</span><span class="op">$</span><span class="va">mus</span></span>
 <span><span class="fu"><a href="../reference/make_post_prop_long.html">make_post_prop_long</a></span><span class="op">(</span></span>
@@ -327,7 +331,7 @@ stream 2, helping you assess how well the model captures the underlying
 signal. You can also explore how the model estimates compare to the
 stream 2 benchmark using Bayesian R<sup>2</sup> (<a href="http://doi.org/10.1080/00031305.2018.1549100" class="external-link">Gelman <em>et
 al.</em>, 2019</a>):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mixmustr_bayes_R2.html">mixmustr_bayes_R2</a></span><span class="op">(</span></span>
 <span>  <span class="va">model_fits</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">model</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  data_streams_list <span class="op">=</span> <span class="va">synthetic_df_convergent</span>, target <span class="op">=</span> <span class="st">"df_stream_2"</span>,</span>
