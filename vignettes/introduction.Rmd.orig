@@ -64,6 +64,10 @@ This vignette will walk you through the basic usage of `MixMustR`, covering:
 
 The combination of these three choices is pre-packaged in `MixMustR` via the data frame `mixmustr_models`.
 
+```{r mixmustrmodels}
+mixmustr_models
+```
+
 ## Synthetic Datasets in `MixMustR`
 
 The `MixMustR` package includes two synthetic mixture datasets, `synthetic_df_convergent` and `synthetic_df_divergent`, designed for testing and validation purposes. Both datasets are anchored to empirical values of stable isotopes and fatty acids from plant carbon sources in marine soils and simulate a hierarchical design of 100 mixture observations arranged in 10 groups of 10, following the factorial simulation design described in the accompanying manuscript.
