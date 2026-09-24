@@ -96,11 +96,21 @@ for further instructions on how to get the compilers running.
 
 See package documentation and [online vignettes](https://open-AIMS.github.io/MixMustR/articles/introduction.html) for full explanation of expected structure of input variables, as well as how to decide on the measurement error/confidence for data stream 2.
 
-```{r eval=TRUE}
+``` r
 library(MixMustR)
 # As an example, we pick `mixmustr_models[8, ]`. To see all variants, simply
 # type
+library(MixMustR)
 mixmustr_models
+#>   sample_tracer fix_unsampled hierarchical                                                            code_path
+#> 1          TRUE          TRUE         TRUE    stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+#> 2         FALSE          TRUE         TRUE   stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+#> 3          TRUE         FALSE         TRUE   stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+#> 4         FALSE         FALSE         TRUE  stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+#> 5          TRUE          TRUE        FALSE   stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+#> 6         FALSE          TRUE        FALSE  stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+#> 7          TRUE         FALSE        FALSE  stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_FALSE.stan
+#> 8         FALSE         FALSE        FALSE stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_FALSE.stan
 ```
 
 ```{r eval=FALSE}

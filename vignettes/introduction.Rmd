@@ -1,7 +1,7 @@
 ---
 title: "Introduction to MixMustR"
 author: "Diego Barneche and Chris Fulton"
-date: "2026-09-23"
+date: "2026-09-24"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to MixMustR}
@@ -52,9 +52,17 @@ The combination of these three choices is pre-packaged in `MixMustR` via the dat
 
 
 ``` r
+library(MixMustR)
 mixmustr_models
-#> Error:
-#> ! object 'mixmustr_models' not found
+#>   sample_tracer fix_unsampled hierarchical                                                            code_path
+#> 1          TRUE          TRUE         TRUE    stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+#> 2         FALSE          TRUE         TRUE   stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+#> 3          TRUE         FALSE         TRUE   stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+#> 4         FALSE         FALSE         TRUE  stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+#> 5          TRUE          TRUE        FALSE   stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+#> 6         FALSE          TRUE        FALSE  stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+#> 7          TRUE         FALSE        FALSE  stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_FALSE.stan
+#> 8         FALSE         FALSE        FALSE stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_FALSE.stan
 ```
 
 ## Synthetic Datasets in `MixMustR`

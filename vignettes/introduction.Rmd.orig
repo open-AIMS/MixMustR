@@ -65,6 +65,7 @@ This vignette will walk you through the basic usage of `MixMustR`, covering:
 The combination of these three choices is pre-packaged in `MixMustR` via the data frame `mixmustr_models`.
 
 ```{r mixmustrmodels}
+library(MixMustR)
 mixmustr_models
 ```
 
