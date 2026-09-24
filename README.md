@@ -111,6 +111,7 @@ streams 1 and 2, with `synthetic_df_convergent` exhibiting little
 difference, whereas `synthetic_df_divergent` exhibits larger difference:
 
     library(MixMustR)
+    library(ggplot2)
     mus <- tracer_parameters$mus
     compare_mixing_proportions(synthetic_df_divergent, synthetic_df_convergent, mus)
 
@@ -153,9 +154,25 @@ for full explanation of expected structure of input variables, as well
 as how to decide on the measurement error/confidence for data stream 2.
 
     library(MixMustR)
+    # As an example, we pick `mixmustr_models[8, ]`. To see all variants, simply
+    # type
+    library(MixMustR)
+    mixmustr_models
+    #>   sample_tracer fix_unsampled hierarchical                                                            code_path
+    #> 1          TRUE          TRUE         TRUE    stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+    #> 2         FALSE          TRUE         TRUE   stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_TRUE.stan
+    #> 3          TRUE         FALSE         TRUE   stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+    #> 4         FALSE         FALSE         TRUE  stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_TRUE.stan
+    #> 5          TRUE          TRUE        FALSE   stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+    #> 6         FALSE          TRUE        FALSE  stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_FALSE.stan
+    #> 7          TRUE         FALSE        FALSE  stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_FALSE.stan
+    #> 8         FALSE         FALSE        FALSE stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_FALSE.stan
+
+    library(MixMustR)
+    library(ggplot2)
     options(mc.cores = parallel::detectCores())
     rstan::rstan_options(auto_write = TRUE)
-    # As an example, we pick mixmustr_models[8, ] because it runs quicker. It is
+    # `mixmustr_models[8, ]` because it runs quicker. It is
     # non-hierarchical and does not estimate the sampled tracer signatures,
     # though it does estimate the unsampled signature. `sigma_ln_rho = 1` is a
     # conservative choice that places weak confidence in the estimates of data
