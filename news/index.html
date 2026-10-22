@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/custom-stan-code.html">Customising MixMustR Stan code</a>
+    </li>
+    <li>
       <a href="../articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul></li>
@@ -67,6 +70,9 @@
 <code><a href="../reference/mixmustr_wrangle_input.html">mixmustr_wrangle_input()</a></code> rewritten to match: source/tracer alignment, optional <code>Unsampled</code> column handling, and <code>sigma_ln_rho</code> now accepts a scalar, a length-<code>J + 1</code> vector, or an <code>N x (J + 1)</code> matrix (previously <code>N x J</code>).</li>
 <li>
 <code><a href="../reference/run_mixmustr_models.html">run_mixmustr_models()</a></code>/<code><a href="../reference/run_mixmod.html">run_mixmod()</a></code> output now also returns the standardised Stan data list used to fit each model (<code>$data</code>).</li>
+<li>
+<code><a href="../reference/run_mixmustr_models.html">run_mixmustr_models()</a></code> gains a <code>build_code</code> argument (default <code>TRUE</code>); set to <code>FALSE</code> to skip <code><a href="../reference/build_stancode.html">build_stancode()</a></code> and use existing Stan files at <code>code_path</code>.</li>
+<li>New vignette, <em>Customising MixMustR Stan code</em>, showing how to generate, edit, and fit custom Stan programs with <code>build_code = FALSE</code>.</li>
 <li>
 <code>synthetic_df_convergent</code> and <code>synthetic_df_divergent</code> regenerated using a hierarchical logistic-normal simulation design (10 groups x 10 observations) with an explicit, out-of-hull pooled-unsampled tracer signature, matching the factorial simulation study described in the accompanying manuscript.</li>
 </ul></div>

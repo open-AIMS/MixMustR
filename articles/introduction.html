@@ -49,6 +49,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/custom-stan-code.html">Customising MixMustR Stan code</a>
+    </li>
+    <li>
       <a href="../articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul>
@@ -407,7 +410,11 @@ R<sup>2</sup> values</li>
 <p>If you want more control, you can use
 <code><a href="../reference/mixmustr_wrangle_input.html">mixmustr_wrangle_input()</a></code> directly to prepare the Stan input
 list. This is helpful if you’re modifying the Stan code or working
-outside the wrapper functions.</p>
+outside the wrapper functions. See
+<code><a href="../articles/custom-stan-code.html">vignette("custom-stan-code", package = "MixMustR")</a></code> for a
+workflow that generates the Stan code with
+<code><a href="../reference/build_stancode.html">build_stancode()</a></code>, edits it (e.g., priors), and fits it with
+<code>run_mixmustr_models(..., build_code = FALSE)</code>.</p>
 <hr>
 </div>
 <div class="section level3">

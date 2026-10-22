@@ -51,6 +51,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/custom-stan-code.html">Customising MixMustR Stan code</a>
+    </li>
+    <li>
       <a href="articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul>
@@ -102,8 +105,9 @@
 </h2>
 <p><code>MixMustR</code> comes with two synthetic mixture datasets, <code>synthetic_df_convergent</code> and <code>synthetic_df_divergent</code>. Both are anchored to empirical values of stable isotopes and fatty acids for a range of plant carbon sources in marine soils. They are hierarchical in structure, simulating 100 mixture observations arranged in 10 groups of 10 (identical between both datasets), following the factorial simulation design described in the accompanying manuscript. They differ in their discrepancy between the underlying mixing proportions between data streams 1 and 2, with <code>synthetic_df_convergent</code> exhibiting little difference, whereas <code>synthetic_df_divergent</code> exhibits larger difference:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(MixMustR)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>mus <span class="ot">&lt;-</span> tracer_parameters<span class="sc">$</span>mus</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">compare_mixing_proportions</span>(synthetic_df_divergent, synthetic_df_convergent, mus)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>mus <span class="ot">&lt;-</span> tracer_parameters<span class="sc">$</span>mus</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">compare_mixing_proportions</span>(synthetic_df_divergent, synthetic_df_convergent, mus)</span></code></pre></div>
 <p align="center">
 <img src="reference/figures/comp_fig.png" width="800/"></p>
 <p>Although in real applications the user is unlikely to know the underlying mixing proportion of data stream 1, these synthetic datasets are useful to test the ability of the model variants (see above) to retrieve the underlying mixture proportions, and the package offers simple summary and visualisation functions for diagnostics.</p>
@@ -128,25 +132,41 @@
 </h2>
 <p>See package documentation and <a href="https://open-AIMS.github.io/MixMustR/articles/introduction.html" class="external-link">online vignettes</a> for full explanation of expected structure of input variables, as well as how to decide on the measurement error/confidence for data stream 2.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(MixMustR)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>rstan<span class="sc">::</span><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># As an example, we pick mixmustr_models[8, ] because it runs quicker. It is</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co"># non-hierarchical and does not estimate the sampled tracer signatures,</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># though it does estimate the unsampled signature. `sigma_ln_rho = 1` is a</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># conservative choice that places weak confidence in the estimates of data</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># stream 2.</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>model_fits <span class="ot">&lt;-</span> <span class="fu">run_mixmustr_models</span>(</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  mixmustr_models[<span class="dv">8</span>, ], synthetic_df_convergent, tracer_parameters,</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">sigma_ln_rho =</span> <span class="dv">1</span>, <span class="at">iter =</span> <span class="fl">1e4</span>, <span class="at">warmup =</span> <span class="fl">5e3</span>, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">cores =</span> <span class="dv">4</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># then visualise a particular output</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">make_post_prop_long</span>(model_fits[[<span class="dv">1</span>]]<span class="sc">$</span>model, tracer_parameters<span class="sc">$</span>mus,</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>                    synthetic_df_convergent, <span class="at">target =</span> <span class="st">"df_stream_2"</span>, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="fu">plot_multiple_faceted_scatter_avg</span>() <span class="sc">+</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Observed (simulated) from composition data (data stream 2)"</span>,</span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Model fit performance mixing proportions"</span>,</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Synthetic dataset of high agreement"</span>)</span></code></pre></div>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># As an example, we pick `mixmustr_models[8, ]`. To see all variants, simply</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># type</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">library</span>(MixMustR)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>mixmustr_models</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   sample_tracer fix_unsampled hierarchical                                                            code_path</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 1          TRUE          TRUE         TRUE    stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_TRUE.stan</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 2         FALSE          TRUE         TRUE   stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_TRUE.stan</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 3          TRUE         FALSE         TRUE   stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_TRUE.stan</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 4         FALSE         FALSE         TRUE  stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_TRUE.stan</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 5          TRUE          TRUE        FALSE   stan/sample_tracer_TRUE_fix_unsampled_TRUE_hierarchical_FALSE.stan</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 6         FALSE          TRUE        FALSE  stan/sample_tracer_FALSE_fix_unsampled_TRUE_hierarchical_FALSE.stan</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; 7          TRUE         FALSE        FALSE  stan/sample_tracer_TRUE_fix_unsampled_FALSE_hierarchical_FALSE.stan</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; 8         FALSE         FALSE        FALSE stan/sample_tracer_FALSE_fix_unsampled_FALSE_hierarchical_FALSE.stan</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">library</span>(MixMustR)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>())</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>rstan<span class="sc">::</span><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co"># `mixmustr_models[8, ]` because it runs quicker. It is</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co"># non-hierarchical and does not estimate the sampled tracer signatures,</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co"># though it does estimate the unsampled signature. `sigma_ln_rho = 1` is a</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co"># conservative choice that places weak confidence in the estimates of data</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co"># stream 2.</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>model_fits <span class="ot">&lt;-</span> <span class="fu">run_mixmustr_models</span>(</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  mixmustr_models[<span class="dv">8</span>, ], synthetic_df_convergent, tracer_parameters,</span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>  <span class="at">sigma_ln_rho =</span> <span class="dv">1</span>, <span class="at">iter =</span> <span class="fl">1e4</span>, <span class="at">warmup =</span> <span class="fl">5e3</span>, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">cores =</span> <span class="dv">4</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>)</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co"># then visualise a particular output</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="fu">make_post_prop_long</span>(model_fits[[<span class="dv">1</span>]]<span class="sc">$</span>model, tracer_parameters<span class="sc">$</span>mus,</span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a>                    synthetic_df_convergent, <span class="at">target =</span> <span class="st">"df_stream_2"</span>, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>  <span class="fu">plot_multiple_faceted_scatter_avg</span>() <span class="sc">+</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Observed (simulated) from composition data (data stream 2)"</span>,</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Model fit performance mixing proportions"</span>,</span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Synthetic dataset of high agreement"</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="further-information">Further Information<a class="anchor" aria-label="anchor" href="#further-information"></a>

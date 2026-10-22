@@ -32,6 +32,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
+      <a href="../articles/custom-stan-code.html">Customising MixMustR Stan code</a>
+    </li>
+    <li>
       <a href="../articles/introduction.html">Introduction to MixMustR</a>
     </li>
   </ul></li>
@@ -68,6 +71,7 @@
 <span>  <span class="va">data_streams_list</span>,</span>
 <span>  <span class="va">tracer_list</span>,</span>
 <span>  <span class="va">sigma_ln_rho</span>,</span>
+<span>  build_code <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,6 +111,13 @@ uncertainty in stream-2 log proportions. A scalar is recycled to an
 across observations. A matrix must have dimensions <code>N x (J + 1)</code>.</p></dd>
 
 
+<dt id="arg-build-code">build_code<a class="anchor" aria-label="anchor" href="#arg-build-code"></a></dt>
+<dd><p>Logical. Should <code><a href="build_stancode.html">build_stancode</a></code> be called to
+(re)generate and write the Stan program to <code>code_path</code> for each model?
+Defaults to <code>TRUE</code>. If <code>FALSE</code>, the Stan files must already exist at
+<code>model_choices$code_path</code>, and are used as is.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://mc-stan.org/rstan/reference/stan.html" class="external-link">stan</a></code>, such as
 <code>iter</code>, <code>chains</code>, or <code>control</code>.</p></dd>
@@ -122,7 +133,8 @@ the standardised Stan data list used to fit it (<code>data</code>).</p>
     <h2>Details</h2>
     <p>The <code>run_mixmustr_models</code> function automates the process of running
 multiple <code>MixMustR</code> models based on user-specified configurations. It builds
-the Stan code for each model, prepares the input data, and runs the models
+the Stan code for each model (unless <code>build_code = FALSE</code>), prepares the
+input data, and runs the models
 sequentially. The results are returned as a list, with each element
 containing the run time and model output for a specific configuration. For
 convenience, <code>MixMustR</code> provides the user with a built-in data frame
