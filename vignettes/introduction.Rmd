@@ -224,7 +224,7 @@ Here's a quick summary of how to use `MixMustR` effectively:
 
 ## Optional: Custom Input Creation
 
-If you want more control, you can use `mixmustr_wrangle_input()` directly to prepare the Stan input list. This is helpful if you're modifying the Stan code or working outside the wrapper functions.
+If you want more control, you can use `mixmustr_wrangle_input()` directly to prepare the Stan input list. This is helpful if you're modifying the Stan code or working outside the wrapper functions. See `vignette("custom-stan-code", package = "MixMustR")` for a workflow that generates the Stan code with `build_stancode()`, edits it (e.g., priors), and fits it with `run_mixmustr_models(..., build_code = FALSE)`.
 
 ---
 

@@ -9,6 +9,7 @@ run_mixmustr_models(
   data_streams_list,
   tracer_list,
   sigma_ln_rho,
+  build_code = TRUE,
   ...
 )
 }
@@ -36,6 +37,11 @@ uncertainty in stream-2 log proportions. A scalar is recycled to an
 \verb{N x (J + 1)} matrix. A vector must have length \code{J + 1} and is recycled
 across observations. A matrix must have dimensions \verb{N x (J + 1)}.}
 
+\item{build_code}{Logical. Should \code{\link{build_stancode}} be called to
+(re)generate and write the Stan program to \code{code_path} for each model?
+Defaults to \code{TRUE}. If \code{FALSE}, the Stan files must already exist at
+\code{model_choices$code_path}, and are used as is.}
+
 \item{...}{Additional arguments passed to \code{\link[rstan]{stan}}, such as
 \code{iter}, \code{chains}, or \code{control}.}
 }
@@ -50,7 +56,8 @@ Runs a set of MixMustR models in Stan
 \details{
 The \code{run_mixmustr_models} function automates the process of running
 multiple \code{MixMustR} models based on user-specified configurations. It builds
-the Stan code for each model, prepares the input data, and runs the models
+the Stan code for each model (unless \code{build_code = FALSE}), prepares the
+input data, and runs the models
 sequentially. The results are returned as a list, with each element
 containing the run time and model output for a specific configuration. For
 convenience, \code{MixMustR} provides the user with a built-in data frame

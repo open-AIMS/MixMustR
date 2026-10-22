@@ -1,0 +1,228 @@
+---
+title: "Customising MixMustR Stan code"
+author: "Diego Barneche"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Customising MixMustR Stan code}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+set.seed(333)
+stopifnot(require(knitr))
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.path = "vignette-fig-custom-",
+  out.width = "90%",
+  fig.align = "center",
+  dev = "png",
+  eval = identical(Sys.getenv("NOT_CRAN"), "true")
+)
+```
+
+# Overview
+
+By default, `run_mixmustr_models()` calls `build_stancode()` internally, so the
+Stan program for each model variant is (re)generated and written to
+`model_choices$code_path` every time models are run. This is convenient, but it
+also means that any manual edits to those `.stan` files would be overwritten.
+
+Advanced users may want to change parts of the Stan program, for example to use
+more informative priors that reflect expert knowledge. This vignette
+illustrates a workflow to do so:
+
+1. Generate the standard Stan program with `build_stancode()`.
+2. Edit the Stan code (here, two priors).
+3. Fit the edited model with `run_mixmustr_models(..., build_code = FALSE)`,
+   which skips `build_stancode()` and uses the `.stan` file as is.
+
+We assume familiarity with the *Introduction to MixMustR* vignette.
+
+```{r message = FALSE, warning = FALSE, results = "hide", echo = FALSE}
+library(MixMustR)
+```
+
+```{r eval = FALSE}
+library(MixMustR)
+rstan::rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+```
+
+---
+
+## Step 1: Choose a model variant and generate its Stan code
+
+We use the variant with fixed sampled-source signatures, a fixed
+unsampled-source signature, and independent observations (row 6 of
+`mixmustr_models`), which is the quickest to fit.
+
+```{r}
+model_choice <- mixmustr_models[6, ]
+model_choice
+```
+
+Rather than using the default `code_path`, we point it to a new file so that
+the customised program is kept separate from the standard ones. Note that the
+file name (without extension) is also used as the Stan model name and as the
+name of the corresponding element in the output of `run_mixmustr_models()`.
+Here we use a temporary directory; in a real analysis you would typically use
+a folder within your project.
+
+```{r}
+stan_dir <- file.path(tempdir(), "mixmustr_stan")
+dir.create(stan_dir, showWarnings = FALSE)
+model_choice$code_path <- file.path(stan_dir, "custom_priors.stan")
+```
+
+Now generate the standard Stan program for this variant and write it to disk:
+
+```{r}
+build_stancode(
+  sample_tracer = model_choice$sample_tracer,
+  fix_unsampled = model_choice$fix_unsampled,
+  hierarchical = model_choice$hierarchical,
+  code_path = model_choice$code_path
+) |>
+  invisible()
+file.exists(model_choice$code_path)
+```
+
+The priors live in the `model` block. Let's print them:
+
+```{r}
+stan_code <- readLines(model_choice$code_path)
+model_start <- grep("^model \\{", stan_code)
+prior_lines <- grep(" ~ ", stan_code)
+prior_lines <- prior_lines[prior_lines > model_start]
+cat(stan_code[prior_lines], sep = "\n")
+```
+
+The last two lines are the stream-2 and stream-1 likelihoods; the remaining
+ones are priors. For this variant:
+
+* `beta0` are the baseline logits of each sampled source relative to the
+  unsampled source (the reference category).
+* `sigma_z` are the observation-level standard deviations of those logits.
+* `log_sigma_y_raw` controls the residual tracer scale for data stream 1.
+* `nu_rho` are the degrees of freedom of the Student-t likelihood for data
+  stream 2.
+
+---
+
+## Step 2: Modify the Stan code
+
+Suppose prior knowledge suggests that the mixing proportions of sampled
+sources are unlikely to be very extreme relative to the unsampled source, and
+that observation-level departures from those baseline logits should be small.
+We tighten the prior on `beta0` and replace the half-normal prior on `sigma_z`
+with an exponential prior.
+
+The `.stan` file can be edited in any text editor. Here we do it
+programmatically, checking that each line to be replaced is present exactly
+once:
+
+```{r}
+replacements <- c(
+  "  beta0 ~ normal(0, 1.5);" = "  beta0 ~ normal(0, 1); // modified prior",
+  "  sigma_z ~ normal(0, 1);" = "  sigma_z ~ exponential(2); // modified prior"
+)
+for (old in names(replacements)) {
+  stopifnot(sum(stan_code == old) == 1)
+  stan_code[stan_code == old] <- replacements[[old]]
+}
+writeLines(stan_code, model_choice$code_path)
+```
+
+It is good practice to check that the edited program still parses before
+fitting it:
+
+```{r}
+rstan::stanc(file = model_choice$code_path)$status
+```
+
+When editing the Stan code, keep in mind that:
+
+* The `data` block must remain compatible with the data list produced by
+  `mixmustr_wrangle_input()`. The `sample_tracer`, `fix_unsampled`, and
+  `hierarchical` columns in `model_choice` must therefore match the variant
+  the file was generated from.
+* The post-processing functions (e.g., `make_post_prop_long()` and
+  `mixmustr_bayes_R2()`) rely on the mixing-proportion matrix `p`, so it
+  should not be renamed or removed.
+* Tracer observations and source signatures are standardised by
+  `mixmustr_wrangle_input()` before fitting, so priors on tracer-scale
+  quantities apply on the standardised scale.
+
+---
+
+## Step 3: Fit the modified model
+
+We now call `run_mixmustr_models()` with `build_code = FALSE`. This skips
+`build_stancode()` so the edited file is not overwritten. If the file at
+`code_path` did not exist, `run_mixmustr_models()` would stop with an
+informative error.
+
+```{r, results = 'hide', message = FALSE, warning = FALSE}
+model_fits <- run_mixmustr_models(
+  model_choice, synthetic_df_convergent, tracer_parameters,
+  sigma_ln_rho = 1, build_code = FALSE, iter = 2e3, warmup = 1e3,
+  chains = 4, cores = 4
+)
+```
+
+The output is named after the `.stan` file. We can confirm that the fitted
+model used the modified priors:
+
+```{r}
+names(model_fits)
+fit <- model_fits$custom_priors$model
+fitted_code <- strsplit(rstan::get_stancode(fit), "\n")[[1]]
+cat(grep("modified prior", fitted_code, value = TRUE), sep = "\n")
+```
+
+And inspect the parameters whose priors were changed:
+
+```{r}
+print(fit, pars = c("beta0", "sigma_z"), probs = c(0.025, 0.5, 0.975))
+```
+
+The fitted model can be used with all `MixMustR` post-processing tools, as
+usual:
+
+```{r fig.width = 7, fig.height = 7, fig.cap = "", dev = "png", dpi = 200}
+library(ggplot2)
+make_post_prop_long(
+  fit, tracer_parameters$mus, synthetic_df_convergent, target = "df_stream_2",
+  n = 1
+) |>
+  plot_multiple_faceted_scatter_avg() +
+  theme(legend.position = "none") +
+  labs(
+    y = "Observed (simulated) from composition data (data stream 2)",
+    title = "Model fit performance mixing proportions",
+    subtitle = "Custom priors on beta0 and sigma_z"
+  )
+```
+
+```{r}
+mixmustr_bayes_R2(
+  fit, summary = TRUE, data_streams_list = synthetic_df_convergent,
+  target = "df_stream_2", order_ref = tracer_parameters$mus$source
+)
+```
+
+---
+
+## Recap
+
+1. Use `build_stancode()` with a custom `code_path` to generate the standard
+   Stan program for the chosen variant.
+2. Edit the `.stan` file (e.g., priors), keeping the `data` block and the
+   mixing-proportion matrix `p` intact.
+3. Fit with `run_mixmustr_models(..., build_code = FALSE)` so the edited file
+   is used as is.

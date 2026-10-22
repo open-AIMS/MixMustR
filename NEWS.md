@@ -14,6 +14,11 @@ First versioned release of `MixMustR`.
   `N x J`).
 * `run_mixmustr_models()`/`run_mixmod()` output now also returns the
   standardised Stan data list used to fit each model (`$data`).
+* `run_mixmustr_models()` gains a `build_code` argument (default `TRUE`); set
+  to `FALSE` to skip `build_stancode()` and use existing Stan files at
+  `code_path`.
+* New vignette, *Customising MixMustR Stan code*, showing how to generate,
+  edit, and fit custom Stan programs with `build_code = FALSE`.
 * `synthetic_df_convergent` and `synthetic_df_divergent` regenerated using a
   hierarchical logistic-normal simulation design (10 groups x 10 observations)
   with an explicit, out-of-hull pooled-unsampled tracer signature, matching

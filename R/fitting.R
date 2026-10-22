@@ -841,13 +841,18 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
 #' @param model_choices A data frame specifying the model configurations to
 #' run. Each row should represent a model, with columns indicating the values
 #' for `sample_tracer`, `fix_unsampled`, `hierarchical`, and `code_path`.
+#' @param build_code Logical. Should \code{\link{build_stancode}} be called to
+#' (re)generate and write the Stan program to `code_path` for each model?
+#' Defaults to `TRUE`. If `FALSE`, the Stan files must already exist at
+#' `model_choices$code_path`, and are used as is.
 #' @param ... Additional arguments passed to \code{\link[rstan]{stan}}, such as 
 #' `iter`, `chains`, or `control`.
 #'
 #' @details
 #' The `run_mixmustr_models` function automates the process of running 
 #' multiple `MixMustR` models based on user-specified configurations. It builds 
-#' the Stan code for each model, prepares the input data, and runs the models 
+#' the Stan code for each model (unless `build_code = FALSE`), prepares the
+#' input data, and runs the models 
 #' sequentially. The results are returned as a list, with each element 
 #' containing the run time and model output for a specific configuration. For
 #' convenience, `MixMustR` provides the user with a built-in data frame
@@ -875,7 +880,7 @@ mixmustr_wrangle_input <- function(data_streams_list, tracer_list,
 #' 
 #' @export
 run_mixmustr_models <- function(model_choices, data_streams_list, tracer_list,
-                                sigma_ln_rho, ...) {
+                                sigma_ln_rho, build_code = TRUE, ...) {
   mu_tab <- tracer_list$mus
   sig_tab <- tracer_list$sigmas
   sig_tab_required <- any(model_choices$sample_tracer | 
@@ -887,11 +892,16 @@ run_mixmustr_models <- function(model_choices, data_streams_list, tracer_list,
   }
   models <- vector(mode = "list", length = nrow(model_choices))
   for (i in seq_len(nrow(model_choices))) {
-    build_stancode(model_choices$sample_tracer[i],
-                   model_choices$fix_unsampled[i],
-                   model_choices$hierarchical[i],
-                   model_choices$code_path[i])
     model_path <- model_choices$code_path[i]
+    if (isTRUE(build_code)) {
+      build_stancode(model_choices$sample_tracer[i],
+                     model_choices$fix_unsampled[i],
+                     model_choices$hierarchical[i],
+                     model_path)
+    } else if (!file.exists(model_path)) {
+      stop("Stan file not found: ", model_path,
+           ". Set `build_code = TRUE` to generate it.", call. = FALSE)
+    }
     sdata <- mixmustr_wrangle_input(
       data_streams_list, tracer_list, model_path, sigma_ln_rho = sigma_ln_rho,
       sample_tracer = model_choices$sample_tracer[i],

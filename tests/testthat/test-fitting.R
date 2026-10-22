@@ -233,3 +233,26 @@ test_that("run_mixmustr_models and run_mixmod return a usable stanfit", {
   )
   expect_s4_class(fit2, "stanfit")
 })
+
+test_that("run_mixmustr_models skips build_stancode when build_code = FALSE", {
+  built <- FALSE
+  local_mocked_bindings(
+    build_stancode = function(...) built <<- TRUE,
+    run_mixmod = function(...) "fit"
+  )
+  choices <- mixmustr_models[6, ]
+  choices$code_path <- tempfile(fileext = ".stan")
+  expect_error(
+    run_mixmustr_models(choices, small_streams, tracer_parameters,
+                        sigma_ln_rho = 1, build_code = FALSE),
+    "Stan file not found"
+  )
+  file.create(choices$code_path)
+  out <- run_mixmustr_models(choices, small_streams, tracer_parameters,
+                             sigma_ln_rho = 1, build_code = FALSE)
+  expect_false(built)
+  expect_identical(out[[1]]$model, "fit")
+  run_mixmustr_models(choices, small_streams, tracer_parameters,
+                      sigma_ln_rho = 1)
+  expect_true(built)
+})
